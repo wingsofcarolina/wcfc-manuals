@@ -1,0 +1,1 @@
+docker run -d --name manuals --volume=/opt/app/root:/home/dwight/Projects/wcfc-manuals/root --env MODE=DEV --env AUTH=OFF -p 9300:9300 planez.co:5000/manuals:1.0.0

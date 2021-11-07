@@ -1,0 +1,98 @@
+<script>
+	import { onMount } from 'svelte'
+	import { goto } from '@sapper/app'
+	import MediaQuery from "svelte-media-query";
+	import { user, adminState } from '../store.js'
+	import { getUser } from '../common.js'
+	import TreeView from '../components/TreeView.svelte'
+	import TableView from '../components/TableView.svelte'
+
+	let equipment = null;
+	let equipmentTypes = null;
+	let aircraft = null;
+	let aircraftTypes = null;
+
+	let dialog;
+	let data = null;
+
+	let tree = null;
+
+	const mediaqueries = {
+	  small: "(max-width: 849px)",
+	  large: "(min-width: 850px)",
+	  short: "(max-height: 399px)",
+	  landscape: "(orientation: landscape) and (max-height: 499px)",
+	  tiny: "(orientation: portrait) and (max-height: 599px)",
+	  dark: "(prefers-color-scheme: dark)",
+	  noanimations: "(prefers-reduced-motion: reduce)"
+	};
+
+	onMount(async () => {
+	  getUser();
+		console.log('First try : ', $user);
+		if ($user == null) {
+			sleep(1000).then(() => {
+				console.log('Second try : ', $user);
+				if ($user == null || $user.anonymous) {
+					goto('login');
+				}
+			})
+		}
+
+		getTree();
+		// getAircraftTypes();
+		// getAircraft();
+		// getEquipmentTypes();
+	  // getEquipment();
+	});
+
+	const sleep = (milliseconds) => {
+	  return new Promise(resolve => setTimeout(resolve, milliseconds))
+	}
+
+	const getTree = async () => {
+		aircraft = null;
+	  const response = await fetch('/api/tree', {
+	    method: "get",
+	    withCredentials: true,
+	    headers: {
+	      'Accept': 'application/json'
+	    }
+	  });
+	  if (!response.ok) {
+			console.log('Status : ', status);
+	    if (response.status == 401) {
+	      console.log('User not authenticated, redirecting to Slack');
+	      goto('login');
+	    } else {
+	      notifier.danger('Retrieve of equipment list failed.');
+	    }
+	  } else {
+	    tree = await response.json();
+	  }
+	}
+
+</script>
+
+<svelte:head>
+	<title>WCFC Flight Equipment</title>
+</svelte:head>
+
+{#if $user != null && $user.anonymous == false}
+	<MediaQuery query="(min-width: 1001px)" let:matches>
+		{#if matches && tree}
+			<TableView />
+		{/if}
+	</MediaQuery>
+
+	<MediaQuery query="(max-width: 1000px)" let:matches>
+	    {#if matches && tree}
+				<TreeView {tree} />
+	    {/if}
+	</MediaQuery>
+{/if}
+
+<style>
+@media (min-width: 480px) {
+}
+</style>

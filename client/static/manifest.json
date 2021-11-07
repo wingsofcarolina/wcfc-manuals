@@ -1,0 +1,15 @@
+{
+	"background_color": "#ffffff",
+	"theme_color": "#ff6600",
+	"name": "Oral Exam Prep",
+	"short_name": "Oral Exam Prep",
+	"display": "minimal-ui",
+	"start_url": "/",
+	"icons": [
+		{
+			"src": "favicon.ico",
+			"sizes": "48x48",
+			"type": "image/ico"
+		}
+	]
+}
