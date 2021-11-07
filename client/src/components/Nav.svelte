@@ -17,8 +17,8 @@
     <div class=logo on:click={home.bind()}><img src=/WCFC-logo.jpg alt="WCFC Manuals"></div>
     <div class=title>WCFC Flight Manuals</div>
   </div>
-	<MediaQuery query="(min-width: 601px)" let:matches>
-		{#if $user &&  $user.admin == true && $user.anonymous == false && segment === "equipment"}
+	<MediaQuery query="(min-width: 1001px)" let:matches>
+		{#if matches && $user &&  $user.admin == true && $user.anonymous == false && segment === "equipment"}
 		  <div class="switch">
 		    <Switch bind:value={$adminState} label="Admin Mode" design="inner"/>
 		  </div>
