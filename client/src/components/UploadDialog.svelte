@@ -25,8 +25,7 @@
   }
 
   const refresh = async (item) => {
-    var request = { command : 'refresh' };
-    dispatch('modify', request );
+    dispatch('message', {command: 'refresh'});
   }
 
   const uploadNewHandout = async () => {

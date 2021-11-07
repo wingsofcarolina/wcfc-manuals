@@ -165,38 +165,33 @@ public class ManualsResource {
 	@Path("user")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response user(@CookieParam("wcfc.manuals.token") Cookie cookie) {
+		User user = null;
+		Boolean anonymous = false;
         Map<String, Object> reply = new HashMap<String, Object>();
 
         if (authEnabled) {
-	        User user = authUtils.getUserFromCookie(cookie);
-	        if (user != null) {
-		        reply.put("name", user.getName());
-		        reply.put("email", user.getEmail());
-		        reply.put("admin", user.getAdmin());
-		        reply.put("anonymous", false);
-
-		        return Response.ok().entity(reply).build();
-	        } else {
-	        	return Response.status(404).build();
-	        }
+        	user = authUtils.getUserFromCookie(cookie);
 		} else {
 			if ( mockUser == null) {
-		        reply.put("name", "Anonymous");
-		        reply.put("email", "nobody@wingsofcarolina.org");
-		        reply.put("anonymous", true);
-		        reply.put("admin", false);
+				user = new User("Anonymous", "nobody@wingsofcarolina.org");
+				anonymous = true;
 			} else {
-		        reply.put("name", mockUser.getName());
-		        reply.put("email", mockUser.getEmail());
-		        reply.put("anonymous", false);
-		        if (mockUser.getEmail().contains("dwight@openweave.org")) {
-		        	reply.put("admin", true);
-		        } else {
-		        	reply.put("admin", false);
-		        }
+				user = new User("Dwight Frye", "dwight@openweave.org");
+				anonymous = false;
 			}
-	        return Response.ok().entity(reply).build();
 		}
+
+        if (user != null) {
+	        reply.put("name", user.getName());
+	        reply.put("email", user.getEmail());
+	        reply.put("admin", user.getAdmin());
+	        reply.put("anonymous", false);
+
+			NewCookie newCookie = authUtils.generateCookie(user);
+	        return Response.ok().entity(reply).cookie(newCookie).build();
+        } else {
+        	return Response.status(404).cookie(AuthUtils.instance().removeCookie()).build();
+        }
 	}
 	
 	@GET
@@ -216,7 +211,7 @@ public class ManualsResource {
 	@GET
 	@Path("aircraft")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response aircraft(@CookieParam("wcfc.manuals.token") Cookie cookie) {
+	public Response getAircraft(@CookieParam("wcfc.manuals.token") Cookie cookie) {
 		User user = AuthUtils.instance().getUserFromCookie(cookie);
 		
 		if (user != null) {
@@ -646,6 +641,9 @@ public class ManualsResource {
 	    if (fileType.equals("application/pdf")) {
 			String newname = root + "/" + path;
 			File newfile = new File(newname);
+			if (newfile.exists()) {
+				FileUtils.deleteQuietly(newfile);
+			}
 			FileUtils.moveFile(targetFile, newfile);
 			if (newfile.exists()) {
 				LOG.info("Creating : {}", newname);

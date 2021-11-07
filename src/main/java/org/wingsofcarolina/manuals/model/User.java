@@ -17,6 +17,10 @@ public class User {
 		this.access_token = access_token;
 	}
 
+	public User(String name, String email) {
+		this(name, email, null, null, null);
+	}
+
 	public String getName() {
 		return name;
 	}
@@ -58,7 +62,6 @@ public class User {
 			String items[] = details.split(":");
 			
 			mock = new User(items[0], items[1], null, null, null);
-			mock.setAdmin(Boolean.valueOf(items[2]));
 		}
 		return mock;
 	}

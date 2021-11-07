@@ -34,9 +34,7 @@
 	      notifier.danger('Retrieve of equipment list failed.');
 	    }
 	  } else {
-      dispatch('message', {
-        command: 'refresh'
-      });
+      dispatch('message', {command: 'refresh'});
     }
 	}
 

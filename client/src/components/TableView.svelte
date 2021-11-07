@@ -24,7 +24,6 @@
 	});
 
 	const getAircraft = async () => {
-		aircraft = null;
 	  const response = await fetch('/api/aircraft', {
 	    method: "get",
 	    withCredentials: true,
@@ -46,7 +45,6 @@
 	}
 
 	const getAircraftTypes= async () => {
-		aircraftTypes = null;
 	  const response = await fetch('/api/aircraft/types', {
 	    method: "get",
 	    withCredentials: true,
@@ -67,7 +65,6 @@
 	}
 
 	const getEquipment = async () => {
-		equipment = null;
 	  const response = await fetch('/api/equipment', {
 	    method: "get",
 	    withCredentials: true,
@@ -88,7 +85,6 @@
 	}
 
 	const getEquipmentTypes = async () => {
-		equipmentTypes = null;
 	  const response = await fetch('/api/equipment/types', {
 	    method: "get",
 	    withCredentials: true,
@@ -156,14 +152,13 @@
 	}
 
 	function upload(name, uuid) {
-		console.log('name : ' +  name +':' + uuid);
 		dialog.raise(name, uuid);
 	}
 
 	function refresh() {
-		console.log('Refresh requested ....');
 		sleep(50).then(() => {
 			getAircraft();
+			getEquipment();
 		})
 	}
 </script>
@@ -188,10 +183,17 @@
 				{#each aircraft as {registration, uuid, hasDocument } }
 					<th class=reg>
 						{#if $user &&  $adminState == 'on' && ! $user.anonymous}
-							<span class='link admin' on:click={upload(registration, uuid)}>{registration}</span>
+							<span class='link admin' on:click={upload(registration, uuid)}>
+								{registration}
+								{#if hasDocument}
+									<img src='document_white.png' alt='Document'>
+								{/if}
+							</span>
 						{:else}
 							{#if hasDocument}
-								<span class='link' on:click={fetchFile(uuid)}>{registration}</span>
+								<span class='link' on:click={fetchFile(uuid)}>
+									{registration} <img src='document_white.png' alt='Document'>
+								</span>
 							{:else}
 								<span class='label'>{registration}</span>
 							{/if}
@@ -207,10 +209,17 @@
 						{#if mtype === type}
 							<tr class='detail'>
 								{#if $user &&  $adminState == 'on' && ! $user.anonymous}
-									<td><span class='equipment link admin' on:click={upload(name, uuid)}>{name}</span></td>
+									<td><span class='equipment link admin' on:click={upload(name, uuid)}>
+										{name}
+										{#if hasDocument}
+											<img src='document.png' alt='Document'>
+										{/if}
+									</span></td>
 								{:else}
 									{#if hasDocument}
-										<td><span class='equipment link' on:click={fetchFile(uuid)}>{name}</span></td>
+										<td><span class='equipment link' on:click={fetchFile(uuid)}>
+											{name}<img src='document.png' alt='Document'>
+										</span></td>
 									{:else}
 										<td><span class='equipment label'>{name}</span></td>
 									{/if}
@@ -226,7 +235,7 @@
 		</table>
 	{/if}
 
-	<UploadDialog bind:this="{dialog}" on:modify/>
+	<UploadDialog bind:this="{dialog}" on:modify on:message={refresh}/>
 
 	<div id='wait'>
 		<Circle2 size="100" color="#7887a2" unit="px"></Circle2>
@@ -239,6 +248,9 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+}
+.detail img {
+	margin-left: 5px;
 }
 #equipment .equipment { text-align: right; float: right; }
 #equipment .admin { }

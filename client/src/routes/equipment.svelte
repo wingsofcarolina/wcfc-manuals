@@ -29,10 +29,8 @@
 
 	onMount(async () => {
 	  getUser();
-		console.log('First try : ', $user);
 		if ($user == null) {
 			sleep(1000).then(() => {
-				console.log('Second try : ', $user);
 				if ($user == null || $user.anonymous) {
 					goto('login');
 				}
@@ -40,10 +38,6 @@
 		}
 
 		getTree();
-		// getAircraftTypes();
-		// getAircraft();
-		// getEquipmentTypes();
-	  // getEquipment();
 	});
 
 	const sleep = (milliseconds) => {
@@ -60,7 +54,6 @@
 	    }
 	  });
 	  if (!response.ok) {
-			console.log('Status : ', status);
 	    if (response.status == 401) {
 	      console.log('User not authenticated, redirecting to Slack');
 	      goto('login');
@@ -90,6 +83,9 @@
 				<TreeView {tree} />
 	    {/if}
 	</MediaQuery>
+{:else}
+	Anonymous access to this material is prohibited. Contact the
+	<strong>Wings of Carolina</strong> for more information.
 {/if}
 
 <style>
