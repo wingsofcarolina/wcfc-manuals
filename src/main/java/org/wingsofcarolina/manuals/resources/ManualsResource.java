@@ -379,6 +379,21 @@ public class ManualsResource {
 		
 		writeJson("Equipment", equipmentCache);
 	}
+	@GET
+	@Path("reload")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response reload(@CookieParam("wcfc.manuals.token") Cookie cookie) throws JsonParseException, JsonMappingException, IOException {
+		User user = authUtils.getUserFromCookie(cookie);
+		
+		if (user.getAdmin()) {
+			loadDataStore();
+			LOG.info("Data stores reloaded from JSON");
+		} else {
+			LOG.info("Non-admin user attempted reloading ... ignored.");
+		}
+			
+		return Response.ok().build();
+	}
 	
 	@GET
 	@Path("tree")
@@ -625,7 +640,7 @@ public class ManualsResource {
 			throws IOException, CsvException, ParseException {
 		
 		String path = identifier + ".pdf";
-	    File targetFile = new File("/tmp/" + identifier + ".tmp");
+	    File targetFile = new File(root + identifier + ".tmp");
 	    OutputStream outStream = new FileOutputStream(targetFile);
 
 	    byte[] buffer = new byte[8 * 1024];
