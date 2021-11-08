@@ -12,8 +12,8 @@ auth: ${AUTH!'ON'}
 mockUser: ${MOCKUSER!'none'}
 
 # Slack channels
-slackNotify: ${SLACK!'REDACTED/REDACTED'}     # Targets #notification
-slackContact: ${SLACK!'REDACTED/REDACTED'}    # Targets #contact
+slackNotify: ${SLACK!'T0H7FTUQK/B02LP23EURJ/d9iiJxMCsr03OBWgYsP4cf9E'}     # Targets #notification
+#slackContact: ${SLACK!'REDACTED/REDACTED'}    # Targets #contact
 
 # Configure ports used by DropWizard
 server:

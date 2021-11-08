@@ -15,20 +15,10 @@
 	});
 
 	const sendMessage = async () => {
-    if (name == null || name === "") {
-      notifier.danger('Name missing, but required.');
-    } else if (email == null || email === "") {
-      notifier.danger('Email address missing, but required.');
-    } else if (message == null || message === "") {
+    if (message == null || message === "") {
       notifier.danger('Message missing, but required.');
     } else {
-			if (phone == null) {
-				phone = "NONE";
-			}
       var json = JSON.stringify({
-        name: name,
-        phone: phone,
-        email: email,
         message: message
       });
 
@@ -78,18 +68,6 @@
 <div class="section">
 	<div class="contact_block">
 		<div class="contact_info">
-			<div class="contact_row">
-				<input type="text" id="name" name="name" placeholder="Name"
-				size=40 bind:value={name}>
-			</div>
-			<div class="contact_row">
-				<input type="text" id="email" name="email" placeholder="Email"
-				size=40 bind:value={email}>
-			</div>
-			<div class="contact_row">
-				<input type="text" id="phone" name="phone" placeholder="Phone (optional)"
-				size=40 bind:value={phone}>
-			</div>
 			<div class="contact_row">
 				<textarea type="text" id="message" name="message" placeholder="Message"
 				cols=41 rows=5 bind:value={message}></textarea>
