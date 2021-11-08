@@ -5,7 +5,7 @@
 
 	<groupId>org.wingsofcarolina</groupId>
 	<artifactId>manuals</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.2</version>
 	<packaging>jar</packaging>
 
 	<name>wcfc-manuals</name>
@@ -241,7 +241,6 @@
 					</execution>
 				</executions>
 			</plugin>
-			<!--
 			<plugin>
 				<groupId>pl.project13.maven</groupId>
 				<artifactId>git-commit-id-plugin</artifactId>
@@ -269,7 +268,6 @@
 					</gitDescribe>
 				</configuration>
 			</plugin>
-			-->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
