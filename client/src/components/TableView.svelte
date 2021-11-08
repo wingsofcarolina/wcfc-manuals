@@ -204,7 +204,7 @@
 
 			{#key aircraft}
 				{#each equipmentTypes as {mtype, label} }
-					<tr class='label'><td><span class='label'>{label}</span></td></tr>
+					<tr><td><span class='label'>{label}</span></td></tr>
 					{#each equipment as { name, type, uuid, hasDocument } }
 						{#if mtype === type}
 							<tr class='detail'>
@@ -221,7 +221,7 @@
 											{name}<img src='document.png' alt='Document'>
 										</span></td>
 									{:else}
-										<td><span class='equipment label'>{name}</span></td>
+										<td><span class='equipment'>{name}</span></td>
 									{/if}
 								{/if}
 								{#each aircraft as acft }
@@ -257,7 +257,8 @@
 #equipment .link { cursor: pointer; }
 #equipment .detail { text-align: center; }
 #equipment .detail:hover {background-color: #ddd;}
-#equipment .blank { background-color:rgba(0, 0, 0, 0); }
+#equipment .blank { background-color:rgba(0, 0, 0, 0); width: 30%; }
+#equipment .label { font-weight: bold; font-size: 1.2em }
 #equipment .reg {
 	width: 30px;
 	-webkit-writing-mode: vertical-lr;

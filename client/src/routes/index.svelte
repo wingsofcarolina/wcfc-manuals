@@ -63,6 +63,11 @@
 				the "contact" page referenced above in the navigation bar or go into the
 				Slack workspace and ask your questions there. </p>
 
+				<p><strong>NOTE:</strong>The PDF documents are launched into a separate
+					browser tab, and therefore you <em>must</em> allow pop-ups for this
+					website. Otherwise your browser may silently just not show you the
+					requested document.</p>
+
 			</div>
 		  </center>
 		</div>
