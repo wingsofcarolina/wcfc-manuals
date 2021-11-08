@@ -54,14 +54,15 @@
 
 <center>
 <div class="narrow">
-	<p> Use the form below to send a message to the administrators of the Groundschool
-		server. We welcome messages, particulary if you see a problem that we might be
-		able to address. Reporting issues/problems aids us in creating a better service
-		for you and your fellow groundschool participants.
 
-		The message is sent to a channel in the Groundschool Slack workspace where it
-		will be addressed by one of the administrators.
-	</p>
+	<p>Use the form below to send a message to the administrators of the WCFC
+	server. We welcome messages, particulary if you see a problem that we might be
+	able to address. Reporting issues/problems aids us in creating a better
+	service for you and your fellow club members.</p>
+
+	<p>The message is sent to a channel in the WCFC Slack workspace where it will
+	be addressed by one of the administrators.</p>
+
 </div>
 </center>
 

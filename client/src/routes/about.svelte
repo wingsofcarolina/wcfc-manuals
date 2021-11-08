@@ -18,12 +18,17 @@
 <center>
 <div class="narrow">
 
-	<p> This site has been put in place to facilitate the sharing of aircraft and
-		equipment manuals at the Wings of Carolina Flying Club.
+	<p>This site has been put in place to facilitate the sharing of aircraft and
+	equipment manuals at the Wings of Carolina Flying Club.</p>
 
-		If you have questions or concerns about this site direct your questions to
-		us via the <a href="contact">contact</a> page. Thanks!
-	</p>
+	<p>This builds on the work done by <b>Ken Williams</b> whose efforts to scan
+	all of  the flight manuals for the club has been invaluable. Rather than
+	continue the  time consuming work of creating, distributing, and updating
+	flash drives it  was felt a web-based solution would make better use of Ken's
+	time. This site  is the result.</p>
+
+	<p>If you have questions or concerns about this site direct your questions to
+	us via the <a href="contact">contact</a> page. Thanks!</p>
 
 	<h2>Cookies</h2>
 
