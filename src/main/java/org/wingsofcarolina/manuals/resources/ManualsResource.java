@@ -413,7 +413,11 @@ public class ManualsResource {
 	        	 if (eidList != null) {
 	        		 for (String eid: eidList) {
 	        			 Equipment e = getEquipmentByUuid(eid);
-	        			 aEntry.addChild(new TreeEntry(e.getName(), eid));
+	        			 if (e != null) {
+	        				 aEntry.addChild(new TreeEntry(e.getName(), eid));
+	        			 } else {
+	        				 LOG.info("Could not find entry with EID : {}", eid);
+	        			 }
 	        		 }
 	        	 }
 	         }
@@ -759,7 +763,7 @@ public class ManualsResource {
 	}
 	
 	private User mockUser() {
-		return new User("Dwight Frye", "dfrye@planez.co", "REDACTED", "REDACTED", "REDACTED");
+		return new User("Dwight Frye", "dwight@openweave.org", "REDACTED", "REDACTED", "REDACTED");
 	}
 	
     private static URL url(String url) {
