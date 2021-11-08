@@ -170,7 +170,7 @@
 	{#if equipment && equipmentTypes && aircraft && aircraftTypes}
 		<table id="equipment">
 			<tr>
-				<th class=blank>&nbsp;</th>
+				<th class='blank'>&nbsp;</th>
 				{#each aircraftTypes as type }
 					<th class='type' colspan={type.count}>
 						<span class='label'>{type.label}</span>
@@ -179,9 +179,9 @@
 			</tr>
 
 			<tr>
-				<th>Equipment</th>
+				<th class='sticky'>Equipment</th>
 				{#each aircraft as {registration, uuid, hasDocument } }
-					<th class=reg>
+					<th class='reg sticky'>
 						{#if $user &&  $adminState == 'on' && ! $user.anonymous}
 							<span class='link admin' on:click={upload(registration, uuid)}>
 								{registration}
@@ -273,6 +273,10 @@
   padding-bottom: 5px;
   background-color: #7887a2;
   color: white;
+}
+#equipment .sticky {
+	position: sticky;
+	top: 0; /* Don't forget this, required for the stickiness */
 }
 
 @media (min-width: 480px) {
