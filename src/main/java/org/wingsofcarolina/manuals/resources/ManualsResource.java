@@ -385,7 +385,7 @@ public class ManualsResource {
 	public Response reload(@CookieParam("wcfc.manuals.token") Cookie cookie) throws JsonParseException, JsonMappingException, IOException {
 		User user = authUtils.getUserFromCookie(cookie);
 		
-		if (user.getAdmin()) {
+		if (user != null && user.getAdmin()) {
 			loadDataStore();
 			LOG.info("Data stores reloaded from JSON");
 		} else {
