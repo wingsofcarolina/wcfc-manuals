@@ -167,6 +167,13 @@
 		upload_dialog.raise(name, uuid);
 	}
 
+	function download() {
+	  var a = document.createElement("a");
+	  a.href = '/api/archive';
+	  a.setAttribute("download", 'wcfc-manuals.zip');
+	  a.click();
+	}
+
 	function refresh() {
 		sleep(50).then(() => {
 			getAircraft();
@@ -256,6 +263,9 @@
 				{/each}
 			{/key}
 		</table>
+
+		<p>
+		<center><button on:click={() => download()}>Download Full Archive</button></center>
 	{/if}
 
 	<UploadDialog bind:this="{upload_dialog}" on:modify on:message={refresh}/>

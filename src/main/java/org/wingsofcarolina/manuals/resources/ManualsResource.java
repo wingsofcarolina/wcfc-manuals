@@ -1,8 +1,10 @@
 package org.wingsofcarolina.manuals.resources;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -14,6 +16,7 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.file.Paths;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -21,6 +24,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -30,6 +34,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.CookieParam;
@@ -44,6 +50,7 @@ import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 
 import com.palantir.roboslack.api.MessageRequest;
 import com.palantir.roboslack.api.attachments.Attachment;
@@ -514,7 +521,7 @@ public class ManualsResource {
 	@GET
 	@Path("equipment/types")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response manualTypes(@CookieParam("wcfc.manuals.token") Cookie cookie) {
+	public Response equipmentTypes(@CookieParam("wcfc.manuals.token") Cookie cookie) {
 		User user = null;
 		
         return Response.ok().entity(EquipmentType.getTypes()).build();
@@ -827,7 +834,184 @@ public class ManualsResource {
 	    }
 	    return fileTypeDefault;
 	}
+	
+	@GET
+	@Path("archive")
+	@Produces(MediaType.TEXT_PLAIN)
+	public Response archive(@CookieParam("wcfc.manuals.token") Cookie cookie) {
+		User user = authUtils.getUserFromCookie(cookie);
+		if (user != null) {
+			
+			String now = new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date());
 
+			byte[] guidePage = generateGuidePage().toString().getBytes();
+			
+			StreamingOutput streamingOutput = outputStream -> {
+				ZipOutputStream zipOut = new ZipOutputStream(new BufferedOutputStream(outputStream));
+				ZipEntry zipEntry = new ZipEntry("index.html");
+				zipOut.putNextEntry(zipEntry);
+				zipOut.write(guidePage, 0, guidePage.length);
+				zipOut.flush();
+				
+				// Stash images
+				addImage(zipOut, "checkmark.png");
+				addImage(zipOut, "WCFC-logo.jpg");
+				
+				// Now, write all the data files
+				addDataFiles(zipOut);
+
+				// Wrap up the Zip file
+				zipOut.close();
+				outputStream.flush();
+				outputStream.close();
+			};
+			
+			return Response.ok(streamingOutput).type(MediaType.TEXT_PLAIN)
+					.header("Content-Disposition", "attachment; filename=\"wcfc-manuals-" + now + ".zip\"").build();
+		} else {
+			return Response.status(401).entity("Are you logged in??").build();
+		}
+	}
+	
+	private void addImage(ZipOutputStream zipOut, String filename) {
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream("assets/" + filename)) {
+
+			zipOut.putNextEntry(new ZipEntry("img/" + filename));
+
+            byte[] buffer = new byte[1024];
+            int len;
+            while ((len = is.read(buffer)) > 0) {
+            	zipOut.write(buffer, 0, len);
+            }
+
+            zipOut.closeEntry();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+	}
+	
+	private void addDataFiles(ZipOutputStream zipOut) {
+		String[] pathnames;
+
+		File f = new File(root);
+
+		// This filter will only include files ending with .py
+		FilenameFilter filter = new FilenameFilter() {
+			@Override
+			public boolean accept(File f, String name) {
+				return name.endsWith(".pdf");
+			}
+		};
+		
+		pathnames = f.list(filter);
+		
+		for (String file : pathnames) {
+			try (FileInputStream fis = new FileInputStream(new File(root + "/" + file))) {
+
+				zipOut.putNextEntry(new ZipEntry("data/" + file));
+
+                byte[] buffer = new byte[1024];
+                int len;
+                while ((len = fis.read(buffer)) > 0) {
+                	zipOut.write(buffer, 0, len);
+                }
+
+                zipOut.closeEntry();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+		}
+	}
+	
+	private StringBuffer generateGuidePage() {
+		
+		StringBuffer sb = new StringBuffer();
+		
+		sb.append("<div class='container'><div class='header'><img src='img/WCFC-logo.jpg'><span style='vertical-align: top'>WCFC Flight Manuals</span></div><hr>");
+		
+		// Output the aircraft type headers
+		sb.append("<table id='equipment'><tr><th class='blank'>&nbsp;</th>");
+	    for(AircraftType t : EnumSet.allOf(AircraftType.class)) {
+	         sb.append("<th class='type' colspan=" + typeCount(t) + "><span class='label'>" + t.getLabel() + "</span></th>");
+	    }
+	    sb.append("</tr>");
+	    
+	    // Output the registration/aircraft headers
+	    sb.append("<tr><th>Equipment</th>");
+	    for (Aircraft acft : aircraftCache) {
+	    	sb.append("<th class='reg'><a href='data/" + acft.getUuid() + ".pdf' target=_blank>" + acft.getRegistration() + "</a></th>");
+	    }
+	    sb.append("</tr>");
+	    
+	    // Output the equipment types
+	    for (Map type : EquipmentType.getTypes()) {
+	    	EquipmentType t = (EquipmentType) type.get("mtype");
+	    	sb.append("<tr class='label'><td>" + t.getLabel() + "</td>");
+	    	// Output all the equipment in the current equipment type
+	    	for (Equipment e : equipmentCache) {
+	    		if (e.getType().equals(t)) {
+	    			sb.append("<tr class='detail'><td class='equipment'><a href='data/" + e.getUuid() + ".pdf' target=_blank>" + e.getName() + "</a></td>");
+	    			// Output all the "checkmarks"
+	    			for (Aircraft acft : aircraftCache) {
+			        	 if (equipmentInstalled(acft, e))
+			        		 sb.append("<td><img src='img/checkmark.png' alt='X'></td>");
+			        	 else
+			        		 sb.append("<td>&nbsp;</td>");
+	    			}
+	    			sb.append("</tr>");
+	    		}
+	    	}
+	    	sb.append("</tr>");
+	    }
+	    
+	    sb.append("</table>");
+	    sb.append("</div>");
+	    
+		sb.append("<style>");
+		sb.append("body {\n" + 
+				"        margin: 0;\n" + 
+				"        font-family: 'Poppins', sans-serif;\n" + 
+				"        font-size: 14px;\n" + 
+				"        line-height: 1.5;\n" + 
+				"        color: #333;\n" + 
+				"}\n");
+		sb.append(".container { margin:75; }\n");
+		sb.append(".header {font-size: 28px; font-weight: 300; }\n");
+		sb.append("#equipment .blank { background-color:rgba(0, 0, 0, 0); width: 30%; }\n");
+		sb.append("#equipment .detail { text-align: center; }\n");
+		sb.append("#equipment .detail a { text-decoration: none; color: black; }\n");
+		sb.append("#equipment .type { text-align: -internal-center; }\n");
+		sb.append("#equipment th {\n" + 
+				"  padding-top: 5px;\n" + 
+				"  padding-bottom: 5px;\n" + 
+				"  background-color: #7887a2;\n" + 
+				"  color: white;\n" + 
+				"}\n");
+		sb.append("#equipment .reg { width: 30px;\n" + 
+				"	-webkit-writing-mode: vertical-lr;\n" + 
+				"	writing-mode: vertical-lr;\n" + 
+				"	-webkit-text-orientation: sideways;\n" + 
+				"	text-orientation: sideways;\n" + 
+				"	text-align: end;\n" + 
+				"	padding: 12px; }\n");
+		sb.append("#equipment .reg a { text-decoration: none; color: white }\n");
+		sb.append("#equipment .label { font-weight: bold; font-size: 1.2em }\n");
+		sb.append("#equipment .equipment { text-align: right; float: right; }\n" + 
+				"#equipment .link { cursor: pointer; font-size: 1.0em }");
+		
+		return sb;
+	}
+
+	private boolean equipmentInstalled(Aircraft acft, Equipment e) {
+		List<String> eidList = acft.getEquipment();
+		if (eidList == null) return false;
+	   	 for (String eid : eidList) {
+	   		 if (eid.equals(e.getUuid()))
+	   			 return true;
+	   	 }
+	   	 return false;
+	}
+	
 	@GET
 	@Path("mock")
 	@Produces(MediaType.APPLICATION_JSON)

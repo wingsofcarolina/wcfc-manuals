@@ -54,16 +54,17 @@
 				<p>We are making this information available through this site to support
 				our members in their use of the aircraft in our fleet. </p>
 
-				<p>To access this material you will be asked to join the WCFC- Slack
+				<p>To access this material you will be asked to join the WCFC Slack
 				workspace (for more information on Slack go to slack.com) since this
-				website uses Slack to authenticate that you are a member of a club. </p>
+				website uses Slack to authenticate that you are a member of a club.
+				If asked for a workspace name enter <b>wcfc.slack.com</b>.</p>
 
 				<p>The links in the navigation bar above will take you to the various
 				provided materials. If you have questions about the material use either
 				the "contact" page referenced above in the navigation bar or go into the
 				Slack workspace and ask your questions there. </p>
 
-				<p><strong>NOTE:</strong>The PDF documents are launched into a separate
+				<p><strong>NOTE:</strong> The PDF documents are launched into a separate
 					browser tab, and therefore you <em>must</em> allow pop-ups for this
 					website. Otherwise your browser may silently just not show you the
 					requested document.</p>

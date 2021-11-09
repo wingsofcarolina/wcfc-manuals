@@ -47,4 +47,9 @@ public class Equipment {
 	public void setUuid(String equipmentId) {
 		this.uuid = equipmentId;
 	}
+
+	@Override
+	public String toString() {
+		return "Equipment [name=" + name + ", type=" + type + ", hasDocument=" + hasDocument + ", uuid=" + uuid + "]";
+	}
 }
