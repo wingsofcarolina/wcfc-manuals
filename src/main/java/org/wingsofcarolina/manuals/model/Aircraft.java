@@ -21,17 +21,6 @@ public class Aircraft {
 		this.registration = registration;
 		this.type = atype;
 	}
-//
-//	public static Integer typeCount(AircraftType t) {
-//		Integer count = 0;
-//
-//		for (Map.Entry<String, Aircraft> entry : cache.entrySet()) {
-//		    if (entry.getValue().getAtype() == t) {
-//		    	count++;
-//		    }
-//		}
-//		return count;
-//	}
 
 	public Boolean getHasDocument() {
 		return hasDocument;

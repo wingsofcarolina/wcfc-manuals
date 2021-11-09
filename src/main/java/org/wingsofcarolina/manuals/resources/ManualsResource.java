@@ -26,6 +26,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
@@ -105,6 +106,8 @@ public class ManualsResource {
 	private static final String AIRCRAFT_JSON = "Aircraft.json";
 	private static final String EQUIPMENT_JSON = "Equipment.json";
 	
+	private final ReentrantLock lock = new ReentrantLock();;
+
 	private List<Equipment> equipmentCache = new ArrayList<Equipment>();
 	private List<Aircraft> aircraftCache = new ArrayList<Aircraft>();
 	private AircraftComparator aircraft_compare = new AircraftComparator();
@@ -142,11 +145,18 @@ public class ManualsResource {
 	}
 	
 	private void loadDataStore() throws JsonParseException, JsonMappingException, IOException {
-		// Load the aircraft store first ....
-	    aircraftCache = Arrays.asList(mapper.readValue(Paths.get(root + "/" + AIRCRAFT_JSON).toFile(), Aircraft[].class));
-	    
-	    // then the equipment store last
-	    equipmentCache = Arrays.asList(mapper.readValue(Paths.get(root + "/" + EQUIPMENT_JSON).toFile(), Equipment[].class));
+		try {
+			lock.lock();
+			
+			// Load the aircraft store first ....
+		    aircraftCache = Arrays.asList(mapper.readValue(Paths.get(root + "/" + AIRCRAFT_JSON).toFile(), Aircraft[].class));
+		    
+		    // then the equipment store last
+		    equipmentCache = Arrays.asList(mapper.readValue(Paths.get(root + "/" + EQUIPMENT_JSON).toFile(), Equipment[].class));
+		} finally {
+			lock.unlock();
+		}
+
 	}
 
 	@GET
@@ -177,7 +187,6 @@ public class ManualsResource {
 				anonymous = true;
 			} else {
 				user = new User("Dwight Frye", "dwight@openweave.org");
-				anonymous = false;
 			}
 		}
 
@@ -185,7 +194,7 @@ public class ManualsResource {
 	        reply.put("name", user.getName());
 	        reply.put("email", user.getEmail());
 	        reply.put("admin", user.getAdmin());
-	        reply.put("anonymous", false);
+	        reply.put("anonymous", anonymous);
 
 			NewCookie newCookie = authUtils.generateCookie(user);
 	        return Response.ok().entity(reply).cookie(newCookie).build();
@@ -215,8 +224,14 @@ public class ManualsResource {
 		User user = AuthUtils.instance().getUserFromCookie(cookie);
 		
 		if (user != null) {
-			// Always return aircraft in type sorted order
-			aircraftCache.sort(aircraft_compare);
+			try {
+				lock.lock();
+
+				// Always return aircraft in type sorted order
+				aircraftCache.sort(aircraft_compare);
+			} finally {
+				lock.unlock();
+			}
 			
 	        return Response.ok().entity(aircraftCache).build();
 		} else {
@@ -232,28 +247,6 @@ public class ManualsResource {
 	    }
 	}
 	
-	private void makeAircraft() {
-		aircraftCache.add(new Aircraft("N4640B", AircraftType.C152));
-		aircraftCache.add(new Aircraft("N5389M", AircraftType.C152));
-		aircraftCache.add(new Aircraft("N69012", AircraftType.C152));
-		aircraftCache.add(new Aircraft("N89333", AircraftType.C152));
-		aircraftCache.add(new Aircraft("N89433", AircraftType.C152));
-
-		aircraftCache.add(new Aircraft("N972WW", AircraftType.C172));
-		aircraftCache.add(new Aircraft("N53587", AircraftType.C172));
-		aircraftCache.add(new Aircraft("N72675", AircraftType.C172));
-
-		aircraftCache.add(new Aircraft("N2114F", AircraftType.PA28));
-		aircraftCache.add(new Aircraft("N64TZ", AircraftType.PA28));
-		aircraftCache.add(new Aircraft("N8080A", AircraftType.PA28));
-		aircraftCache.add(new Aircraft("N8116J", AircraftType.PA28));
-
-		aircraftCache.add(new Aircraft("N1068X", AircraftType.M20J));
-		aircraftCache.add(new Aircraft("N5760R", AircraftType.M20J));
-		
-		writeJson("Aircraft", aircraftCache);
-	}
-	
 	@PATCH
 	@Path("aircraft/add")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -265,12 +258,19 @@ public class ManualsResource {
 			String registration = request.get("aircraft");
 			String uuid = request.get("uuid");
 			
-			Aircraft aircraft = getAircraftByRegistration(registration);
-			Equipment equipment = getEquipmentByUuid(uuid);
-			if (aircraft != null && equipment != null) {
-				aircraft.addEquipment(equipment);
+			try {
+				// We need to ensure that nobody does anything while we are updating
+				lock.lock();
+
+				Aircraft aircraft = getAircraftByRegistration(registration);
+				Equipment equipment = getEquipmentByUuid(uuid);
+				if (aircraft != null && equipment != null) {
+					aircraft.addEquipment(equipment);
+				}
+				writeJson("Aircraft", aircraftCache);
+			} finally {
+				lock.unlock();
 			}
-			writeJson("Aircraft", aircraftCache);
 		} else {
 			return Response.status(404).build();
 		}
@@ -289,12 +289,20 @@ public class ManualsResource {
 			String registration = request.get("aircraft");
 			String uuid = request.get("uuid");
 			
-			Aircraft aircraft = getAircraftByRegistration(registration);
-			Equipment equipment = getEquipmentByUuid(uuid);
-			if (aircraft != null && equipment != null) {
-				aircraft.removeEquipment(equipment);
+			try {
+				// We need to ensure that nobody does anything while we are updating
+				lock.lock();
+
+				// TODO: This needs work!
+				Aircraft aircraft = getAircraftByRegistration(registration);
+				Equipment equipment = getEquipmentByUuid(uuid);
+				if (aircraft != null && equipment != null) {
+					aircraft.removeEquipment(equipment);
+				}
+				writeJson("Aircraft", aircraftCache);
+			} finally {
+				lock.unlock();
 			}
-			writeJson("Aircraft", aircraftCache);
 		} else {
 			return Response.status(404).build();
 		}
@@ -305,11 +313,17 @@ public class ManualsResource {
 	@GET
 	@Path("equipment")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response equipment(@CookieParam("wcfc.manuals.token") Cookie cookie) {
+	public Response getEquipment(@CookieParam("wcfc.manuals.token") Cookie cookie) {
 		User user = null;
 
-		// Always return aircraft in type sorted order
-		equipmentCache.sort(manual_compare);
+		try {
+			lock.lock();
+			
+			// Always return aircraft in type sorted order
+			equipmentCache.sort(manual_compare);
+		} finally {
+			lock.unlock();
+		}
 		
         return Response.ok().entity(equipmentCache).build();
 	}
@@ -324,61 +338,7 @@ public class ManualsResource {
 	    }
 	}
 	
-	private void makeManuals() {
-		
-		equipmentCache.add(new Equipment("AEM AA80 InterVox",EquipmentType.INTERCOM));
-		equipmentCache.add(new Equipment("PS Engineering PM1000",EquipmentType.INTERCOM));
-		equipmentCache.add(new Equipment("PS Engineering PM1000II",EquipmentType.INTERCOM));
-		equipmentCache.add(new Equipment("PS Engineering PM3000",EquipmentType.INTERCOM));
-		equipmentCache.add(new Equipment("Sigtronics SPA-400",EquipmentType.INTERCOM));
 
-		equipmentCache.add(new Equipment("Bendix/King KMA 24",EquipmentType.AUDIOPNL));
-		equipmentCache.add(new Equipment("Bendix/King KMA 28",EquipmentType.AUDIOPNL));
-		equipmentCache.add(new Equipment("Garmin GMA 345",EquipmentType.AUDIOPNL));
-		equipmentCache.add(new Equipment("PS Engineering PMA6000B",EquipmentType.AUDIOPNL));
-
-		equipmentCache.add(new Equipment("Bendix/King KX 155",EquipmentType.NAVCOM));
-		equipmentCache.add(new Equipment("Bendix/King KX 155A",EquipmentType.NAVCOM));
-		equipmentCache.add(new Equipment("Bendix/King KX 165",EquipmentType.NAVCOM));
-		equipmentCache.add(new Equipment("Garmin GNC 255",EquipmentType.NAVCOM));
-		equipmentCache.add(new Equipment("Narco MK 12D TSO",EquipmentType.NAVCOM));
-
-		equipmentCache.add(new Equipment("Appareo Stratus",EquipmentType.TRANSPONDER));
-		equipmentCache.add(new Equipment("Bendix/King KT76A",EquipmentType.TRANSPONDER));
-		equipmentCache.add(new Equipment("Garmin GTX 327",EquipmentType.TRANSPONDER));
-		equipmentCache.add(new Equipment("Garmin GTX 345",EquipmentType.TRANSPONDER));
-
-		equipmentCache.add(new Equipment("GTN 650 / Pilot's Guide",EquipmentType.GPS));
-		equipmentCache.add(new Equipment("GTN 650 / Cockpit Reference Guide",EquipmentType.GPS));
-		equipmentCache.add(new Equipment("GTN 750 / Pilot's Guide",EquipmentType.GPS));
-		equipmentCache.add(new Equipment("GTN 750 / Cockpit Reference Guide",EquipmentType.GPS));
-
-		equipmentCache.add(new Equipment("Bendix/King KAP 140",EquipmentType.AUTOPILOT));
-		equipmentCache.add(new Equipment("Bendix/King KAP 150",EquipmentType.AUTOPILOT));
-		equipmentCache.add(new Equipment("Garmin GFC 500",EquipmentType.AUTOPILOT));
-		equipmentCache.add(new Equipment("GFC 500 / G5 w/ GFC 500 Pilot Guide",EquipmentType.AUTOPILOT));
-		equipmentCache.add(new Equipment("GFC 500 / AFMS PA-28",EquipmentType.AUTOPILOT));
-		equipmentCache.add(new Equipment("S-TEC System 50",EquipmentType.AUTOPILOT));
-
-		equipmentCache.add(new Equipment("JPI Fuel Scan 450",EquipmentType.TOTALIZER));
-		equipmentCache.add(new Equipment("Shadin MiniFlo-L",EquipmentType.TOTALIZER));
-
-		equipmentCache.add(new Equipment("EI CGR-30P",EquipmentType.ENGMONITOR));
-		equipmentCache.add(new Equipment("EI SA-8A",EquipmentType.ENGMONITOR));
-		equipmentCache.add(new Equipment("EI SA-8A Operating Manual",EquipmentType.ENGMONITOR));
-		equipmentCache.add(new Equipment("QEI SA-8A uick Reference",EquipmentType.ENGMONITOR));
-		equipmentCache.add(new Equipment("Insight G2",EquipmentType.ENGMONITOR));
-
-		equipmentCache.add(new Equipment("Bendix/King KN 64",EquipmentType.DME));
-
-		equipmentCache.add(new Equipment("Bendix/King KMD 550 Multi-Function Display",EquipmentType.OTHER));
-		equipmentCache.add(new Equipment("BFG WX-900 Storm Scope",EquipmentType.OTHER));
-		equipmentCache.add(new Equipment("BFG WX-950 Storm Scope",EquipmentType.OTHER));
-		equipmentCache.add(new Equipment("Garmin G5",EquipmentType.OTHER));
-		equipmentCache.add(new Equipment("Precise Flight Pulselite",EquipmentType.OTHER));
-		
-		writeJson("Equipment", equipmentCache);
-	}
 	@GET
 	@Path("reload")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -403,25 +363,31 @@ public class ManualsResource {
 		TreeEntry head = new TreeEntry("WCFC Flight Manuals", null);
 		head.setOpen(true);
 	    
-	    for(AircraftType t : EnumSet.allOf(AircraftType.class)) {
-	    	TreeEntry tEntry = new TreeEntry(t.getLabel(), null);
-	    	head.addChild(tEntry);
-	         for (Aircraft a : allAircraftOfType(t)) {
-	        	 TreeEntry aEntry = new TreeEntry(a.getRegistration(), a.getUuid());
-	        	 tEntry.addChild(aEntry);
-	        	 List<String> eidList = a.getEquipment();
-	        	 if (eidList != null) {
-	        		 for (String eid: eidList) {
-	        			 Equipment e = getEquipmentByUuid(eid);
-	        			 if (e != null) {
-	        				 aEntry.addChild(new TreeEntry(e.getName(), eid));
-	        			 } else {
-	        				 LOG.info("Could not find entry with EID : {}", eid);
-	        			 }
-	        		 }
-	        	 }
-	         }
-	    }
+		try {
+			lock.lock();
+			
+		    for(AircraftType t : EnumSet.allOf(AircraftType.class)) {
+		    	TreeEntry tEntry = new TreeEntry(t.getLabel(), null);
+		    	head.addChild(tEntry);
+		         for (Aircraft a : allAircraftOfType(t)) {
+		        	 TreeEntry aEntry = new TreeEntry(a.getRegistration(), a.getUuid());
+		        	 tEntry.addChild(aEntry);
+		        	 List<String> eidList = a.getEquipment();
+		        	 if (eidList != null) {
+		        		 for (String eid: eidList) {
+		        			 Equipment e = getEquipmentByUuid(eid);
+		        			 if (e != null) {
+		        				 aEntry.addChild(new TreeEntry(e.getName(), eid));
+		        			 } else {
+		        				 LOG.info("Could not find entry with EID : {}", eid);
+		        			 }
+		        		 }
+		        	 }
+		         }
+		    }
+		} finally {
+			lock.unlock();
+		}
 	    
 		return Response.ok().entity(head).build();
 	}
@@ -447,21 +413,39 @@ public class ManualsResource {
 			this.label = label;
 			this.link = link;
 		}
-		public Boolean getOpen() {
-			return open;
-		}
-		public void setOpen(Boolean open) {
-			this.open = open;
-		}
+
 		public String getLabel() {
 			return label;
 		}
+
+		public void setLabel(String label) {
+			this.label = label;
+		}
+
 		public String getLink() {
 			return link;
 		}
+
+		public void setLink(String link) {
+			this.link = link;
+		}
+
+		public Boolean getOpen() {
+			return open;
+		}
+
+		public void setOpen(Boolean open) {
+			this.open = open;
+		}
+
 		public ArrayList<TreeEntry> getChildren() {
 			return children;
 		}
+
+		public void setChildren(ArrayList<TreeEntry> children) {
+			this.children = children;
+		}
+
 		public void addChild(TreeEntry child) {
 			if (children == null) {
 				children = new ArrayList<TreeEntry>();
@@ -475,14 +459,19 @@ public class ManualsResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response aircraftTypes(@CookieParam("wcfc.manuals.token") Cookie cookie) {
 		User user = null;
-		
 		List<TypeEntry> response = new ArrayList<TypeEntry>();
 		
-	    for(AircraftType t : EnumSet.allOf(AircraftType.class)) {
-	         response.add(new TypeEntry(typeCount(t), t));
-	    }
-		
-        return Response.ok().entity(response).build();
+		try {
+			lock.lock();
+			
+		    for(AircraftType t : EnumSet.allOf(AircraftType.class)) {
+		         response.add(new TypeEntry(typeCount(t), t));
+		    }
+		} finally {
+			lock.unlock();
+		}
+
+		return Response.ok().entity(response).build();
 	}
 	
 	private Integer typeCount(AircraftType t) {
@@ -546,6 +535,95 @@ public class ManualsResource {
 		}
 	}
 	
+	@POST
+	@Path("equipment/register")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response registerEquipment(@CookieParam("wcfc.manuals.token") Cookie cookie,
+			Map<String, String> request) {
+		User user = authUtils.getUserFromCookie(cookie);
+		if (user != null) {
+			if (user.getAdmin()) {
+				String name = request.get("name");
+				String type = request.get("type");
+				
+				try {
+					lock.lock();
+				
+					// Add to the in-memory cache
+					addNewEquipment(type, name);
+					
+					// Persist the change
+					writeJson("Equipment", equipmentCache);
+				} finally {
+					lock.unlock();
+				}
+				
+				return Response.ok().build();
+			} else {
+				return Response.status(401).entity("Not authorized.").build();
+			}
+		}
+		return Response.status(404).entity("Are you logged in??").build();
+	}
+	
+	@POST
+	@Path("aircraft/register")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response registerAircraft(@CookieParam("wcfc.manuals.token") Cookie cookie,
+			Map<String, String> request) {
+		User user = authUtils.getUserFromCookie(cookie);
+		if (user != null) {
+			if (user.getAdmin()) {
+				String registration = request.get("registration");
+				String type = request.get("type");
+				
+				try {
+					lock.lock();
+					
+					// Add to the in-memory cache
+					addNewAircraft(type, registration);
+					
+					// Persist the change
+					writeJson("Aircraft", aircraftCache);
+				} finally {
+					lock.unlock();
+				}
+				
+				return Response.ok().build();
+			} else {
+				return Response.status(401).entity("Not authorized.").build();
+			}
+		}
+		return Response.status(404).entity("Are you logged in??").build();
+	}
+	
+	private void addNewEquipment(String type, String name) {
+		EquipmentType eType = EquipmentType.valueOf(type);
+		if (eType != null) {
+			Equipment equipment = new Equipment(name, eType);
+			if (equipmentCache != null && equipment != null) {
+				equipmentCache = new ArrayList<Equipment>(equipmentCache);
+				equipmentCache.add(equipment);
+			} else {
+				LOG.info("WTF? Why is the equipment cache OR the newly created equipment null??");
+			}
+		}
+	}
+
+	private void addNewAircraft(String type, String registration) {
+		AircraftType aType = AircraftType.valueOf(type);
+		if (aType != null) {
+			Aircraft aircraft = new Aircraft(registration, aType);
+			if (aircraftCache != null && aircraft != null) {
+				aircraftCache = new ArrayList<Aircraft>(aircraftCache);
+				aircraftCache.add(aircraft);
+			} else {
+				LOG.info("WTF? Why is the aircraft cache OR the newly created aircraft null??");
+			}
+		}
+	}
+	
+
 	@POST
 	@Path("contact")
 	@Produces(MediaType.APPLICATION_JSON)

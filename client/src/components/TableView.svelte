@@ -6,13 +6,17 @@
 	import { Circle2 } from 'svelte-loading-spinners'
 	import Checkmark from "../components/Checkmark.svelte";
 	import UploadDialog from "../components/UploadDialog.svelte";
+	import NewEquipmentDialog from "../components/NewEquipmentDialog.svelte";
+	import NewAircraftDialog from "../components/NewAircraftDialog.svelte";
 
 	let equipment = null;
 	let equipmentTypes = null;
 	let aircraft = null;
 	let aircraftTypes = null;
 
-	let dialog;
+	let upload_dialog;
+	let equipment_dialog;
+	let aircraft_dialog;
 	let data = null;
 
 	onMount(async () => {
@@ -151,14 +155,24 @@
 	  })
 	}
 
+	function registerNewEquipment() {
+		equipment_dialog.raise();
+	}
+
+	function registerNewAircraft() {
+		aircraft_dialog.raise();
+	}
+
 	function upload(name, uuid) {
-		dialog.raise(name, uuid);
+		upload_dialog.raise(name, uuid);
 	}
 
 	function refresh() {
 		sleep(50).then(() => {
 			getAircraft();
+			getAircraftTypes();
 			getEquipment();
+			getEquipmentTypes();
 		})
 	}
 </script>
@@ -167,10 +181,19 @@
 	<title>WCFC Flight Equipment</title>
 </svelte:head>
 
+
 	{#if equipment && equipmentTypes && aircraft && aircraftTypes}
 		<table id="equipment">
 			<tr>
-				<th class='blank'>&nbsp;</th>
+				{#if $user &&  $adminState == 'on' && ! $user.anonymous}
+					<th class='blank'>
+						<span class='newLabel'>New :&nbsp;</span>
+						<button on:click={() => registerNewEquipment()}>Equipment</button>
+						<button on:click={() => registerNewAircraft()}>Aircraft</button>
+					</th>
+				{:else}
+					<th class='blank'>&nbsp;</th>
+				{/if}
 				{#each aircraftTypes as type }
 					<th class='type' colspan={type.count}>
 						<span class='label'>{type.label}</span>
@@ -195,7 +218,7 @@
 									{registration} <img src='document_white.png' alt='Document'>
 								</span>
 							{:else}
-								<span class='label'>{registration}</span>
+								<span class='no_link'>{registration}</span>
 							{/if}
 						{/if}
 					</th>
@@ -235,7 +258,9 @@
 		</table>
 	{/if}
 
-	<UploadDialog bind:this="{dialog}" on:modify on:message={refresh}/>
+	<UploadDialog bind:this="{upload_dialog}" on:modify on:message={refresh}/>
+	<NewEquipmentDialog bind:this="{equipment_dialog}" on:modify on:message={refresh}/>
+	<NewAircraftDialog bind:this="{aircraft_dialog}" on:modify on:message={refresh}/>
 
 	<div id='wait'>
 		<Circle2 size="100" color="#7887a2" unit="px"></Circle2>
@@ -252,13 +277,15 @@
 .detail img {
 	margin-left: 5px;
 }
+#equipment .newLabel { font-size: 1.3em; color: crimson }
 #equipment .equipment { text-align: right; float: right; }
 #equipment .admin { }
-#equipment .link { cursor: pointer; }
+#equipment .link { cursor: pointer; font-size: 1.0em }
+#equipment .no_link { cursor: pointer; font-size: 1.0em }
+#equipment .label { font-weight: bold; font-size: 1.2em }
 #equipment .detail { text-align: center; }
 #equipment .detail:hover {background-color: #ddd;}
 #equipment .blank { background-color:rgba(0, 0, 0, 0); width: 30%; }
-#equipment .label { font-weight: bold; font-size: 1.2em }
 #equipment .reg {
 	width: 30px;
 	-webkit-writing-mode: vertical-lr;
