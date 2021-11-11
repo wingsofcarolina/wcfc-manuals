@@ -5,7 +5,7 @@
 
 	<groupId>org.wingsofcarolina</groupId>
 	<artifactId>manuals</artifactId>
-	<version>1.0.6</version>
+	<version>1.0.7</version>
 	<packaging>jar</packaging>
 
 	<name>wcfc-manuals</name>
@@ -223,7 +223,7 @@
 							<tasks>
 								<exec dir="./client" executable="/usr/local/bin/npx">
 									<arg
-										line="sapper export --entry '/ equipment contact about login'" />
+										line="sapper export --entry '/ equipment contact about'" />
 								</exec>
 								<delete dir="target/classes/assets" />
 								<copy todir="target/classes/assets">
