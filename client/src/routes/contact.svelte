@@ -117,7 +117,7 @@ input, textarea {
 	padding: 10px;
 	margin: 10px 0;
 	border:0;
-	box-shadow:0 0 15px 4px rgba(0,0,0,0.06);
+	box-shadow:0 0 15px 4px rgba(0,0,0,0.26);
 	font-family: inherit;
 }
 input[type=submit] {
