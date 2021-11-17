@@ -1,6 +1,7 @@
 <script>
   import { notifier } from '@beyonk/svelte-notifications'
   import { createEventDispatcher } from 'svelte';
+  import { Circle2 } from 'svelte-loading-spinners'
 
   const dispatch = createEventDispatcher();
 
@@ -30,6 +31,8 @@
 
   const uploadNewHandout = async () => {
     visible = false;
+    document.body.style.cursor='wait';
+		document.getElementById('wait').style.visibility = 'visible';
 
     if (files == null || identifier == null) {
       notifier.danger("All values must be provided.")
@@ -51,6 +54,8 @@
       } else {
         notifier.danger('File failed to upload (not a PDF??)');
       }
+      document.body.style.cursor='default';
+      document.getElementById('wait').style.visibility = 'hidden';
     }
   }
 </script>
@@ -71,7 +76,18 @@
   </div>
 </div>
 
+<div id='wait'>
+  <Circle2 size="100" color="#7887a2" unit="px"></Circle2>
+</div>
+
 <style>
+#wait {
+  visibility: hidden;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
 .name {
   text-align: center;
   font-weight: bold;
