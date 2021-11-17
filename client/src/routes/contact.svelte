@@ -5,20 +5,29 @@
 	import { user } from '../store.js'
 	import { getUser } from '../common.js'
 
-	let name;
-	let phone;
-	let email;
+	let name = null;
+	let email = null;
 	let message;
 
 	onMount(function() {
 		getUser();
+		if ($user.anonymous === false) {
+			name = $user.name;
+			email = $user.email;
+		}
 	});
 
 	const sendMessage = async () => {
-    if (message == null || message === "") {
+		if (name == null) {
+			notifier.danger('Name missing, but required.');
+		} else if (email == null) {
+			notifier.danger('Email missing, but required.');
+    } else if (message == null || message === "") {
       notifier.danger('Message missing, but required.');
     } else {
       var json = JSON.stringify({
+				name: name,
+				email: email,
         message: message
       });
 
@@ -37,7 +46,6 @@
       } else {
         notifier.success('Message sent successfully.');
 				name = null;
-        phone = null;
         email = null;
         message = null;
       }
@@ -69,6 +77,14 @@
 <div class="section">
 	<div class="contact_block">
 		<div class="contact_info">
+			<div class="contact_row">
+				<input type="text" id="name" name="name" placeholder="Name"
+				size=40 bind:value={name}>
+			</div>
+			<div class="contact_row">
+				<input type="text" id="email" name="email" placeholder="Email"
+				size=40 bind:value={email}>
+			</div>
 			<div class="contact_row">
 				<textarea type="text" id="message" name="message" placeholder="Message"
 				cols=41 rows=5 bind:value={message}></textarea>

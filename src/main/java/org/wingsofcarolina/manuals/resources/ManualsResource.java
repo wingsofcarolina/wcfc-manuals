@@ -636,22 +636,21 @@ public class ManualsResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response contact(@CookieParam("wcfc.manuals.token") Cookie cookie,
 			Map<String, String> request) {
-		User user = authUtils.getUserFromCookie(cookie);
-		if (user != null) {
-			Slack.instance().sendMessage(Slack.Channel.NOTIFY, contactMessage(user, request));
+
+		String name = request.getOrDefault("name", "NONE");
+		String email = request.getOrDefault("email", "NONE");
+		String message = request.getOrDefault("message", "NONE");
+		
+		if (name != null && email != null && message != null) {
+			Slack.instance().sendMessage(Slack.Channel.NOTIFY, contactMessage(name, email, message));
 		} else {
-			LOG.info("An unknown user tried to send a contact message!");
+			LOG.info("Someone without all the input values tried to send a contact message!");
 		}
 		return Response.ok().build();
 	}
 	
-	private MessageRequest contactMessage(User user, Map<String, String> request) {
-		String name = user.getName();
-		String email = user.getEmail();
-		String message = request.getOrDefault("message", "NONE");
-
+	private MessageRequest contactMessage(String name, String email, String message) {
 		ZoneId zoneId = ZoneId.of("US/Eastern");
-		LOG.info("Zone : {}", zoneId);
 		ZonedDateTime now = LocalDateTime.now().atZone(zoneId);
 		
 		Builder ab = Attachment.builder()
