@@ -13,7 +13,7 @@ import java.io.IOException;
 public class SimpleLogger {
     // Set a small log file size to demonstrate the rolling log files.
 	public static final int MB = 1000*1024;
-	public static final int FILE_SIZE = 1024; //20*MB;
+	public static final int FILE_SIZE = 20*MB;
     
 	Logger logger = Logger.getLogger(SimpleLogger.class.getName());
 
