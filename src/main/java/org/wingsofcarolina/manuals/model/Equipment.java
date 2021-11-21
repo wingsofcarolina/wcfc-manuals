@@ -1,6 +1,5 @@
 package org.wingsofcarolina.manuals.model;
 
-import java.util.HashMap;
 import java.util.UUID;
 
 public class Equipment {

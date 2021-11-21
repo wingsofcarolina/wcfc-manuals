@@ -81,6 +81,7 @@ import org.wingsofcarolina.manuals.model.User;
 import org.wingsofcarolina.manuals.slack.Slack;
 import org.wingsofcarolina.manuals.slack.SlackAuthService;
 import org.wingsofcarolina.manuals.ManualsConfiguration;
+import org.wingsofcarolina.manuals.SimpleLogger;
 import org.wingsofcarolina.manuals.authentication.AuthUtils;
 import org.wingsofcarolina.manuals.common.APIException;
 
@@ -88,10 +89,13 @@ import org.wingsofcarolina.manuals.common.APIException;
  * @author dwight
  *
  */
-@Path("/")	// Note that this is actually accessed as /api due to the setUrPattern() call in OralService
+@Path("/")	// Note that this is actually accessed as /api due to the setUrPattern() call in parent service
 public class ManualsResource {
 	private static final Logger LOG = LoggerFactory.getLogger(ManualsResource.class);
 	
+	private static SimpleLogger authLog;
+	private static SimpleLogger accessLog;
+
 	private static ManualsConfiguration config;
 	private static String versionOverride = null;
 	private DateTimeFormatter dateFormatGmt;
@@ -103,6 +107,9 @@ public class ManualsResource {
 
 	private AuthUtils authUtils;
 	private boolean authEnabled = false;
+	
+	private Integer authCount = 0;
+	private Integer accessCount = 0;
 	
 	private static User mockUser = null; // When we are developing and don't want to authenticate with Slack
 	
@@ -123,6 +130,10 @@ public class ManualsResource {
 	@SuppressWarnings("static-access")
 	public ManualsResource(ManualsConfiguration config) throws IOException, ListFolderErrorException, DbxException {
 		this.config = config;
+		
+		// Create authentication and access logs
+		authLog = new SimpleLogger("authentication", config);
+		accessLog = new SimpleLogger("access", config);
 		
 		// See if we have turned auth on
 		authEnabled = config.getAuth();
@@ -179,6 +190,24 @@ public class ManualsResource {
 	}
 	
 	@GET
+	@Path("status")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response stats(@CookieParam("wcfc.manuals.token") Cookie cookie) {
+		User user = AuthUtils.instance().getUserFromCookie(cookie);
+
+		if (user.getEmail().equals("dwight@openweave.org")) {
+			Map<String, Integer> reply = new HashMap<String, Integer>();
+			
+			reply.put("authCount", authCount);
+			reply.put("accessCount", accessCount);
+		
+		return Response.ok().entity(reply).build();
+		} else {
+			return Response.status(401).build();
+		}
+	}
+	
+	@GET
 	@Path("user")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response user(@CookieParam("wcfc.manuals.token") Cookie cookie) {
@@ -213,15 +242,30 @@ public class ManualsResource {
 	@GET
 	@Path("fetch/{uuid}")
 	@Produces("application/pdf")
-	public Response fetchFile(@PathParam("uuid") String uuid) throws IOException, DbxException {
-		
+	public Response fetchFile(@CookieParam("wcfc.manuals.token") Cookie cookie,
+			@PathParam("uuid") String uuid) throws IOException, DbxException {
+
+		User user = AuthUtils.instance().getUserFromCookie(cookie);
+
 		File file = new File(root + "/" + uuid + ".pdf");
 		if (file.exists()) {
+			accessLog.logAccess(user, equipmentName(uuid));
+			accessCount++;
+			
 	        InputStream inputStream = new FileInputStream(file);
 	        return Response.ok().type("application/pdf").entity(inputStream).build();
 		} else {
 			return Response.status(404).build();
 		}
+	}
+	
+	private String equipmentName(String uuid) {
+		for (Equipment e : equipmentCache) {
+			if (e.getUuid().equals(uuid)) {
+				return e.getName();
+			}
+		}
+		return "Not Found";
 	}
 	
 	@GET
@@ -680,8 +724,6 @@ public class ManualsResource {
 	@Produces(MediaType.TEXT_HTML)
 	@SuppressWarnings("unchecked")
 	public Response auth(@QueryParam("code") String code) throws URISyntaxException, APIException {
-		LOG.info("Code : {}", code);
-		
 		if (code != null) {
 			Map<String, Object> details = slackAuth.authenticate(code);
 			Map<String, Object> user_details = (Map<String, Object>)details.get("authed_user");
@@ -696,8 +738,8 @@ public class ManualsResource {
 			String email = userMap.get("email");
 			
 			User user = new User(name, email, user_id, team_id, access_token);
-			LOG.info("Authenticated user : {}", user);
-			//Slack.instance().sendString(Slack.Channel.NOTIFY, "Authenticated user : " + user);
+			authLog.logUser(user);
+			authCount++;
 			
 			// User authenticated and identified. Save the info.
 			NewCookie cookie = authUtils.generateCookie(user);
