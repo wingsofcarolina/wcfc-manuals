@@ -15,9 +15,10 @@ public class SimpleLogger {
 	public static final int MB = 1000*1024;
 	public static final int FILE_SIZE = 20*MB;
     
-	Logger logger = Logger.getLogger(SimpleLogger.class.getName());
+	Logger logger;
 
     public SimpleLogger(String name, ManualsConfiguration config) {
+    	 logger = Logger.getLogger(SimpleLogger.class.getName() + "-" + name);
 
         try {
             // Creating an instance of FileHandler with 5 logging files
