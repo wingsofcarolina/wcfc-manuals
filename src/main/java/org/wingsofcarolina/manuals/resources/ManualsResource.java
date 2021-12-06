@@ -901,6 +901,7 @@ public class ManualsResource {
 				
 				// Stash images
 				addImage(zipOut, "checkmark.png");
+				addImage(zipOut, "unchecked.png");
 				addImage(zipOut, "WCFC-logo.jpg");
 				
 				// Now, write all the data files
@@ -951,10 +952,11 @@ public class ManualsResource {
 		
 		pathnames = f.list(filter);
 		
-		for (String file : pathnames) {
-			try (FileInputStream fis = new FileInputStream(new File(root + "/" + file))) {
+		for (String fileName : pathnames) {
+			String name = zipOutputName(fileName);
+			try (FileInputStream fis = new FileInputStream(new File(root + "/" + fileName))) {
 
-				zipOut.putNextEntry(new ZipEntry("data/" + file));
+				zipOut.putNextEntry(new ZipEntry("data/" + name));
 
                 byte[] buffer = new byte[1024];
                 int len;
@@ -967,6 +969,10 @@ public class ManualsResource {
                 e.printStackTrace();
             }
 		}
+	}
+	
+	private String zipOutputName(String uuid) {
+		return documentName(uuid.substring(0, 36)).replace(' ', '_').replace('/', '-').replace('\'', '^') + ".pdf";
 	}
 	
 	private StringBuffer generateGuidePage() {
@@ -985,7 +991,7 @@ public class ManualsResource {
 	    // Output the registration/aircraft headers
 	    sb.append("<tr><th>Equipment</th>");
 	    for (Aircraft acft : aircraftCache) {
-	    	sb.append("<th class='reg'><a href='data/" + acft.getUuid() + ".pdf' target=_blank>" + acft.getRegistration() + "</a></th>");
+	    	sb.append("<th class='reg'><a href='data/" + zipOutputName(acft.getUuid()) + "' target=_blank>" + acft.getRegistration() + "</a></th>");
 	    }
 	    sb.append("</tr>");
 	    
@@ -996,13 +1002,13 @@ public class ManualsResource {
 	    	// Output all the equipment in the current equipment type
 	    	for (Equipment e : equipmentCache) {
 	    		if (e.getType().equals(t)) {
-	    			sb.append("<tr class='detail'><td class='equipment'><a href='data/" + e.getUuid() + ".pdf' target=_blank>" + e.getName() + "</a></td>");
+	    			sb.append("<tr class='detail'><td class='equipment'><a href='data/" + zipOutputName(e.getUuid()) + "' target=_blank>" + e.getName() + "</a></td>");
 	    			// Output all the "checkmarks"
 	    			for (Aircraft acft : aircraftCache) {
 			        	 if (equipmentInstalled(acft, e))
 			        		 sb.append("<td><img src='img/checkmark.png' alt='X'></td>");
 			        	 else
-			        		 sb.append("<td>&nbsp;</td>");
+			        		 sb.append("<td><img src='img/unchecked.png' alt='-'></td>");
 	    			}
 	    			sb.append("</tr>");
 	    		}
