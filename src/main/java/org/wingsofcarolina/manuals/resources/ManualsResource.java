@@ -249,7 +249,7 @@ public class ManualsResource {
 
 		File file = new File(root + "/" + uuid + ".pdf");
 		if (file.exists()) {
-			accessLog.logAccess(user, equipmentName(uuid));
+			accessLog.logAccess(user, documentName(uuid));
 			accessCount++;
 			
 	        InputStream inputStream = new FileInputStream(file);
@@ -259,10 +259,15 @@ public class ManualsResource {
 		}
 	}
 	
-	private String equipmentName(String uuid) {
+	private String documentName(String uuid) {
 		for (Equipment e : equipmentCache) {
 			if (e.getUuid().equals(uuid)) {
 				return e.getName();
+			}
+		}
+		for (Aircraft a : aircraftCache) {
+			if (a.getUuid().equals(uuid)) {
+				return a.getRegistration() + " POH";
 			}
 		}
 		return "Not Found";
