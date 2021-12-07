@@ -246,16 +246,20 @@ public class ManualsResource {
 			@PathParam("uuid") String uuid) throws IOException, DbxException {
 
 		User user = AuthUtils.instance().getUserFromCookie(cookie);
+		if (user != null) {
 
 		File file = new File(root + "/" + uuid + ".pdf");
-		if (file.exists()) {
-			accessLog.logAccess(user, documentName(uuid));
-			accessCount++;
-			
-	        InputStream inputStream = new FileInputStream(file);
-	        return Response.ok().type("application/pdf").entity(inputStream).build();
+			if (file.exists()) {
+				accessLog.logAccess(user, documentName(uuid));
+				accessCount++;
+				
+		        InputStream inputStream = new FileInputStream(file);
+		        return Response.ok().type("application/pdf").entity(inputStream).build();
+			} else {
+				return Response.status(404).build();
+			}
 		} else {
-			return Response.status(404).build();
+			return Response.status(401).build();
 		}
 	}
 	

@@ -25,6 +25,8 @@
 					goto('login');
 				}
 			})
+		} else if ( $user.anonymous ) {
+			goto('login');
 		}
 
 		getTree();
