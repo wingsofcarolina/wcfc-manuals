@@ -68,6 +68,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.exceptions.CsvException;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.tika.Tika;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
@@ -958,6 +959,7 @@ public class ManualsResource {
 		
 		for (String fileName : pathnames) {
 			String name = zipOutputName(fileName);
+			System.out.println("===> " + name);
 			try (FileInputStream fis = new FileInputStream(new File(root + "/" + fileName))) {
 
 				zipOut.putNextEntry(new ZipEntry("data/" + name));
@@ -976,7 +978,35 @@ public class ManualsResource {
 	}
 	
 	private String zipOutputName(String uuid) {
-		return documentName(uuid.substring(0, 36)).replace(' ', '_').replace('/', '-').replace('\'', '^') + ".pdf";
+		String zipName = null;
+		String zipDirectory = null;
+		
+		uuid = FilenameUtils.removeExtension(uuid);
+		
+		for (Equipment e : equipmentCache) {
+			if (e.getUuid().equals(uuid)) {
+				zipDirectory = e.getType().getLabel();
+				zipName = e.getName();
+				break;
+			}
+		}
+		if (zipName == null) {
+			for (Aircraft a : aircraftCache) {
+				if (a.getUuid().equals(uuid)) {
+					zipDirectory = a.getType().getLabel();
+					zipName = a.getRegistration() + " POH";
+					break;
+				}
+			}
+		}
+		
+		if (zipDirectory != null && zipName != null) {
+			return zipDirectory.replace(' ', '_').replace('/', '_') + "/" +
+					zipName.replace(' ', '_').replace('/', '-').replace('\'', '^') + ".pdf";
+		} else {
+			System.out.println("Cound not find a name for ==> " + uuid);
+			return "unknown.pdf";
+		}
 	}
 	
 	private StringBuffer generateGuidePage() {
