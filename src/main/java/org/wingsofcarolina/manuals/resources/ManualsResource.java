@@ -234,14 +234,10 @@ public class ManualsResource {
 	        reply.put("anonymous", anonymous);
 
 			NewCookie newCookie = authUtils.generateCookie(user);
-			// The following header hack is due to (a) Chrome demanding SameSite be set
-			// and (b) NewCookie having no way to freaking do that. WTF people?
-	        return Response.ok().entity(reply).header("Set-Cookie", newCookie.toString() + ";SameSite=none").build();
+	        return Response.ok().entity(reply).header("Set-Cookie", AuthUtils.sameSite(newCookie)).build();
         } else {
         	NewCookie newCookie = AuthUtils.instance().removeCookie();
-    		// The following header hack is due to (a) Chrome demanding SameSite be set
-    		// and (b) NewCookie having no way to freaking do that. WTF people?
-        	return Response.status(404).header("Set-Cookie", newCookie.toString() + ";SameSite=none").build();
+        	return Response.status(404).header("Set-Cookie", AuthUtils.sameSite(newCookie)).build();
         }
 	}
 	
@@ -758,14 +754,10 @@ public class ManualsResource {
 			
 			// User authenticated and identified. Save the info.
 			NewCookie cookie = authUtils.generateCookie(user);
-			// The following header hack is due to (a) Chrome demanding SameSite be set
-			// and (b) NewCookie having no way to freaking do that. WTF people?
-			return Response.seeOther(new URI("/equipment")).header("Set-Cookie", cookie.toString() + ";SameSite=none").build();
+			return Response.seeOther(new URI("/equipment")).header("Set-Cookie", AuthUtils.sameSite(cookie)).build();
 		} else {
 			NewCookie cookie = authUtils.removeCookie();
-			// The following header hack is due to (a) Chrome demanding SameSite be set
-			// and (b) NewCookie having no way to freaking do that. WTF people?
-			return Response.seeOther(new URI("/")).header("Set-Cookie", cookie.toString() + ";SameSite=none").build();
+			return Response.seeOther(new URI("/")).header("Set-Cookie", AuthUtils.sameSite(cookie)).build();
 		}
 	}
 	
@@ -1117,10 +1109,7 @@ public class ManualsResource {
 		
 		// User authenticated and identified. Save the info.
 		NewCookie cookie = authUtils.generateCookie(user);
-		
-		// The following header hack is due to (a) Chrome demanding SameSite be set
-		// and (b) NewCookie having no way to freaking do that. WTF people?
-        return Response.seeOther(new URI("/")).header("Set-Cookie", cookie.toString() + ";SameSite=none").build();
+        return Response.seeOther(new URI("/")).header("Set-Cookie", AuthUtils.sameSite(cookie)).build();
 	}
 	
 	private User mockUser() {
