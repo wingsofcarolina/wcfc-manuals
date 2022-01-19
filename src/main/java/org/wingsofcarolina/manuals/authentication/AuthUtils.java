@@ -100,12 +100,13 @@ public class AuthUtils {
 	public NewCookie generateCookie(User user) {
 		boolean secure = ManualsConfiguration.instance().getMode().compareTo("DEV") == 0 ? false : true;
 		int maxAge = 86400*30;  // Seconds per day, times days to live
-		return new NewCookie("wcfc.manuals.token", generateToken(user), "/", "", "WCFC Manuals ID", maxAge, secure, true);
+		NewCookie cookie = new NewCookie("wcfc.manuals.token", generateToken(user), "/", "wingsofcarolina.org", "WCFC Manuals ID", maxAge, secure, true);
+		return cookie;
 	}
 
 	public NewCookie removeCookie() {
 		boolean secure = ManualsConfiguration.instance().getMode().compareTo("DEV") == 0 ? false : true;
-		return new NewCookie("wcfc.manuals.token", null, "/", "", "WCFC Manuals ID", 0, secure, true);
+		return new NewCookie("wcfc.manuals.token", null, "/", "wingsofcarolina.org", "WCFC Manuals ID", 0, secure, true);
 	}
 
 	public User getUserFromCookie(Cookie cookie) {
