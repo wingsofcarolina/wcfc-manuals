@@ -28,6 +28,7 @@ import java.util.Date;
 import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
@@ -39,6 +40,7 @@ import java.util.zip.ZipOutputStream;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.CookieParam;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.PATCH;
 import javax.ws.rs.POST;
@@ -249,14 +251,13 @@ public class ManualsResource {
 
 		User user = AuthUtils.instance().getUserFromCookie(cookie);
 		if (user != null) {
-
-		File file = new File(root + "/" + uuid + ".pdf");
+			File file = new File(root + "/" + uuid + ".pdf");
 			if (file.exists()) {
 				accessLog.logAccess(user, documentName(uuid));
 				accessCount++;
-				
-		        InputStream inputStream = new FileInputStream(file);
-		        return Response.ok().type("application/pdf").entity(inputStream).build();
+
+				InputStream inputStream = new FileInputStream(file);
+				return Response.ok().type("application/pdf").entity(inputStream).build();
 			} else {
 				return Response.status(404).build();
 			}
@@ -626,6 +627,64 @@ public class ManualsResource {
 			}
 		}
 		return Response.status(404).entity("Are you logged in??").build();
+	}
+	
+	@DELETE
+	@Path("/equipment/{uuid}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response deleteEquipment(@CookieParam("wcfc.manuals.token") Cookie cookie,
+	@PathParam("uuid") String uuid) {
+		User user = authUtils.getUserFromCookie(cookie);
+		if (user != null) {
+			if (user.getAdmin()) {
+				LOG.info("Deleting document {} from the system.", uuid);
+				try {
+					lock.lock();
+					
+					// Remove from the aircraft store first ....
+				    Iterator<Aircraft> a_it = aircraftCache.iterator();
+				    while (a_it.hasNext()) {
+				    	Aircraft aircraft = a_it.next();
+				    	List<String> equipmentList = aircraft.getEquipment();
+				    	if (equipmentList != null) {
+					    	Iterator<String> d_it = equipmentList.listIterator();
+					    	while (d_it.hasNext()) {
+					    		String document = d_it.next();
+					    		if (document.equalsIgnoreCase(uuid)) {
+					    			LOG.debug("Removing {} from {}", uuid, aircraft.getLabel());
+					    			d_it.remove();
+					    		}
+					    	}
+				    	}
+				    }
+				    
+				    // then the equipment store last
+				    List<Equipment> newCache = new ArrayList<Equipment>();
+
+				    Iterator<Equipment> e_it = equipmentCache.listIterator();
+				    while (e_it.hasNext()) {
+				    	Equipment equipment = e_it.next();
+				    	if ( ! equipment.getUuid().equalsIgnoreCase(uuid)) {
+				    		newCache.add(equipment);
+				    	} else {
+			    			LOG.info("Removing {} from equipment list", equipment.getName());
+				    	}
+				    }
+				    equipmentCache = newCache;
+				    
+				    // Physically remove the file
+					File file = new File(root + "/" + uuid + ".pdf");
+					file.delete();
+				    
+					// Persist the change
+					writeJson("Equipment", equipmentCache);
+					writeJson("Aircraft", aircraftCache);
+				} finally {
+					lock.unlock();
+				}
+			}
+		}
+		return Response.ok().build();
 	}
 	
 	@POST

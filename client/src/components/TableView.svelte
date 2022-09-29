@@ -7,6 +7,7 @@
 	import Checkmark from "../components/Checkmark.svelte";
 	import UploadDialog from "../components/UploadDialog.svelte";
 	import NewEquipmentDialog from "../components/NewEquipmentDialog.svelte";
+	import DeleteEquipmentDialog from "../components/DeleteEquipmentDialog.svelte";
 	import NewAircraftDialog from "../components/NewAircraftDialog.svelte";
 
 	let equipment = null;
@@ -16,6 +17,7 @@
 
 	let upload_dialog;
 	let equipment_dialog;
+	let delete_dialog;
 	let aircraft_dialog;
 	let data = null;
 
@@ -113,6 +115,7 @@
 	}
 
 	const fetchFile = async (uuid) => {
+		console.log('Fetch ----> ', uuid);
 		document.body.style.cursor='wait';
 		document.getElementById('wait').style.visibility = 'visible';
 
@@ -165,6 +168,10 @@
 
 	function upload(name, uuid) {
 		upload_dialog.raise(name, uuid);
+	}
+
+	function deleteEquipment(name, uuid) {
+		delete_dialog.raise(name, uuid);
 	}
 
 	function download() {
@@ -239,17 +246,29 @@
 						{#if mtype === type}
 							<tr class='detail'>
 								{#if $user &&  $adminState == 'on' && ! $user.anonymous}
-									<td><span class='equipment link admin' on:click={upload(name, uuid)}>
-										{name}
+									<td>
 										{#if hasDocument}
-											<img src='document.png' alt='Document'>
+											<span class='equipment link admin'>
+												<span on:click={upload(name, uuid)}>
+													{name}<img src='document.png' alt='Document'>
+												</span>
+												<span on:click={deleteEquipment(name, uuid)}>
+													<img src='delete.png' alt='Delete'>
+												</span>
+											</span>
+										{:else}
+											<span class='equipment link admin' on:click={upload(name, uuid)}>
+												{name}
+											</span>
 										{/if}
-									</span></td>
+									</td>
 								{:else}
 									{#if hasDocument}
-										<td><span class='equipment link' on:click={fetchFile(uuid)}>
-											{name}<img src='document.png' alt='Document'>
-										</span></td>
+										<td>
+											<span class='equipment link' on:click={fetchFile(uuid)}>{name}
+												<img src='document.png' alt='Document'>
+											</span>
+										</td>
 									{:else}
 										<td><span class='equipment'>{name}</span></td>
 									{/if}
@@ -270,6 +289,7 @@
 
 	<UploadDialog bind:this="{upload_dialog}" on:modify on:message={refresh}/>
 	<NewEquipmentDialog bind:this="{equipment_dialog}" on:modify on:message={refresh}/>
+	<DeleteEquipmentDialog bind:this="{delete_dialog}" on:modify on:message={refresh}/>
 	<NewAircraftDialog bind:this="{aircraft_dialog}" on:modify on:message={refresh}/>
 
 	<div id='wait'>

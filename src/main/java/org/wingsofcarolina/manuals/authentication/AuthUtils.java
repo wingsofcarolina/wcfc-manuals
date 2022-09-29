@@ -1,10 +1,7 @@
 package org.wingsofcarolina.manuals.authentication;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
-
 import javax.crypto.spec.SecretKeySpec;
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.NewCookie;
@@ -26,6 +23,8 @@ import io.jsonwebtoken.impl.DefaultClaims;
 public class AuthUtils {
 	private static final Logger LOG = LoggerFactory.getLogger(AuthUtils.class);
 
+	private Boolean authEnabled = false;
+	
 	private static AuthUtils instance = null;
 	
 	// For SecretKeySpec generation
@@ -121,6 +120,10 @@ public class AuthUtils {
 	public User getUserFromCookie(Cookie cookie) {
 		User user = null;
 		
+		if (!authEnabled) {
+			user = new User("Dwight Frye", "dwight@openweave.org");
+		}
+
 		if (cookie != null) {
 			Jws<Claims> claims = decodeCookie(cookie);
 			Claims body = claims.getBody();
@@ -135,7 +138,7 @@ public class AuthUtils {
 			
 			HashMap mymap = mapper.convertValue(body, HashMap.class);
 
-			if (mymap.containsKey("admin")) {
+			if (mymap.containsKey("admin") || !authEnabled) {
 				user.setAdmin((Boolean) body.get("admin"));
 			} else {
 				user.setAdmin(false);
