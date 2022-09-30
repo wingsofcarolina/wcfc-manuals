@@ -1007,7 +1007,7 @@ public class ManualsResource {
 
 		File f = new File(root);
 
-		// This filter will only include files ending with .py
+		// This filter will only include files ending with .pdf
 		FilenameFilter filter = new FilenameFilter() {
 			@Override
 			public boolean accept(File f, String name) {
@@ -1019,7 +1019,6 @@ public class ManualsResource {
 		
 		for (String fileName : pathnames) {
 			String name = zipOutputName(fileName);
-			System.out.println("===> " + name);
 			try (FileInputStream fis = new FileInputStream(new File(root + "/" + fileName))) {
 
 				zipOut.putNextEntry(new ZipEntry("data/" + name));
@@ -1032,7 +1031,8 @@ public class ManualsResource {
 
                 zipOut.closeEntry();
             } catch (IOException e) {
-                e.printStackTrace();
+                LOG.info("IOException in addDataFiles() : {}", e.getCause().getMessage());
+                break;
             }
 		}
 	}
