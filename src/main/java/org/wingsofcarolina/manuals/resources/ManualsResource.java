@@ -948,17 +948,16 @@ public class ManualsResource {
 	
 	@GET
 	@Path("archive")
-	@Produces(MediaType.TEXT_PLAIN)
-	public Response archive(@CookieParam("wcfc.manuals.token") Cookie cookie) {
+	public Response archive(@CookieParam("wcfc.manuals.token") Cookie cookie) throws IOException {
 		User user = authUtils.getUserFromCookie(cookie);
 		if (user != null) {
-			
-			String now = new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date());
-
-			byte[] guidePage = generateGuidePage().toString().getBytes();
-			
-			StreamingOutput streamingOutput = outputStream -> {
-				ZipOutputStream zipOut = new ZipOutputStream(new BufferedOutputStream(outputStream));
+			LOG.info("Starting new archive generation.");
+			ZipOutputStream zipOut = null;
+			try {
+				FileOutputStream fout = new FileOutputStream(new File("dynamic/wcfc-manuals.zip"));
+				zipOut = new ZipOutputStream(fout);
+				
+				byte[] guidePage = generateGuidePage().toString().getBytes();
 				ZipEntry zipEntry = new ZipEntry("index.html");
 				zipOut.putNextEntry(zipEntry);
 				zipOut.write(guidePage, 0, guidePage.length);
@@ -971,15 +970,15 @@ public class ManualsResource {
 				
 				// Now, write all the data files
 				addDataFiles(zipOut);
-
-				// Wrap up the Zip file
+			} catch (IOException ex) {
+				LOG.info("IOException during archive generation : {}", ex.getMessage());
+			} finally {
+				// 	Wrap up the Zip file
 				zipOut.close();
-				outputStream.flush();
-				outputStream.close();
-			};
-			
-			return Response.ok(streamingOutput).type(MediaType.TEXT_PLAIN)
-					.header("Content-Disposition", "attachment; filename=\"wcfc-manuals-" + now + ".zip\"").build();
+			}
+			LOG.info("New archive generation completed.");
+
+			return Response.ok().build();
 		} else {
 			return Response.status(401).entity("Are you logged in??").build();
 		}

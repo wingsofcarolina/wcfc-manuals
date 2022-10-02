@@ -4,6 +4,7 @@
 	import { user, adminState } from '../store.js'
 	import { getUser } from '../common.js'
 	import { Circle2 } from 'svelte-loading-spinners'
+	import { notifier } from '@beyonk/svelte-notifications'
 	import Checkmark from "../components/Checkmark.svelte";
 	import UploadDialog from "../components/UploadDialog.svelte";
 	import NewEquipmentDialog from "../components/NewEquipmentDialog.svelte";
@@ -115,7 +116,6 @@
 	}
 
 	const fetchFile = async (uuid) => {
-		console.log('Fetch ----> ', uuid);
 		document.body.style.cursor='wait';
 		document.getElementById('wait').style.visibility = 'visible';
 
@@ -174,11 +174,26 @@
 		delete_dialog.raise(name, uuid);
 	}
 
-	function download() {
-	  var a = document.createElement("a");
-	  a.href = '/api/archive';
-	  a.setAttribute("download", 'wcfc-manuals.zip');
-	  a.click();
+	const archive = async () => {
+		document.body.style.cursor='wait';
+		document.getElementById('wait').style.visibility = 'visible';
+
+    const response = await fetch('/api/archive', {
+      method: "get",
+      withCredentials: true,
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+    });
+    if (!response.ok) {
+      notifier.danger('Request to generate new archive failed.');
+    } else {
+			notifier.success('Archive generation succeeded.');
+
+			document.body.style.cursor='default';
+			document.getElementById('wait').style.visibility = 'hidden';
+		}
 	}
 
 	function refresh() {
@@ -204,6 +219,7 @@
 						<span class='newLabel'>New :&nbsp;</span>
 						<button on:click={() => registerNewEquipment()}>Equipment</button>
 						<button on:click={() => registerNewAircraft()}>Aircraft</button>
+						<button on:click={() => archive()}>Generate Archive</button>
 					</th>
 				{:else}
 					<th class='blank'>&nbsp;</th>
@@ -284,7 +300,7 @@
 		</table>
 
 		<p>
-		<center><button on:click={() => download()}>Download Full Archive</button></center>
+		<center><a href="wcfc-manuals.zip">WCFC Manual Archive</a></center>
 	{/if}
 
 	<UploadDialog bind:this="{upload_dialog}" on:modify on:message={refresh}/>
@@ -306,6 +322,12 @@
 }
 .detail img {
 	margin-left: 5px;
+}
+a {
+	text-decoration: none;
+	color: blue;
+	padding: 10px;
+	border-radius: 35%;
 }
 #equipment .newLabel { font-size: 1.3em; color: crimson }
 #equipment .equipment { text-align: right; float: right; }

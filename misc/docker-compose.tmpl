@@ -1,0 +1,20 @@
+version: '3'
+services:
+
+  server:
+    container_name: manuals.server
+    image: planez.co:5000/manuals:{VERSION}
+    ports:
+      - "9300:9300"
+    environment:
+      - MODE=PROD
+      - AUTH=ON
+    volumes:
+     - ./data/gs_root:/gs_root
+     - /mnt/manuals-data/root:/opt/app/root
+     - /mnt/manuals-data/dynamic:/opt/app/dynamic
+    networks:
+     - manuals
+
+networks:
+  manuals:
