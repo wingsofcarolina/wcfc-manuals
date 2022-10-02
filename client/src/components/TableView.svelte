@@ -300,7 +300,7 @@
 		</table>
 
 		<p>
-		<center><a href="wcfc-manuals.zip">WCFC Manual Archive</a></center>
+		<center><a href="wcfc-manuals.zip">Download Full Manual Archive</a></center>
 	{/if}
 
 	<UploadDialog bind:this="{upload_dialog}" on:modify on:message={refresh}/>
