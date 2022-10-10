@@ -6,7 +6,7 @@
 	<groupId>org.wingsofcarolina</groupId>
 	<artifactId>manuals</artifactId>
 	<packaging>jar</packaging>
-	<version>1.2.1</version>
+	<version>1.2.2</version>
 	
 	<name>wcfc-manuals</name>
 

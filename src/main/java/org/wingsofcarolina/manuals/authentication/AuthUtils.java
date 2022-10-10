@@ -23,8 +23,6 @@ import io.jsonwebtoken.impl.DefaultClaims;
 public class AuthUtils {
 	private static final Logger LOG = LoggerFactory.getLogger(AuthUtils.class);
 
-	private Boolean authEnabled = false;
-	
 	private static AuthUtils instance = null;
 	
 	// For SecretKeySpec generation
@@ -120,7 +118,8 @@ public class AuthUtils {
 	public User getUserFromCookie(Cookie cookie) {
 		User user = null;
 		
-		if (!authEnabled) {
+		// If auth is not enabled, hard-code it to Dwight
+		if ( ! ManualsConfiguration.instance().getAuth()) {
 			user = new User("Dwight Frye", "dwight@openweave.org");
 		}
 
@@ -138,7 +137,7 @@ public class AuthUtils {
 			
 			HashMap mymap = mapper.convertValue(body, HashMap.class);
 
-			if (mymap.containsKey("admin") || !authEnabled) {
+			if (mymap.containsKey("admin") || ! ManualsConfiguration.instance().getAuth()) {
 				user.setAdmin((Boolean) body.get("admin"));
 			} else {
 				user.setAdmin(false);
