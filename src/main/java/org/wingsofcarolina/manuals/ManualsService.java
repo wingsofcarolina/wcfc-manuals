@@ -50,7 +50,15 @@ public class ManualsService extends Application<ManualsConfiguration> {
 	
 	@Override
 	public void run(ManualsConfiguration config, Environment env) throws Exception {
+		
+		// Configure server to require /api before all server calls
 		env.jersey().setUrlPattern("/api/*");
+		
+		if (config.getAuth()) {
+			LOG.info("Authorization enabled");
+		} else {
+			LOG.info("Authorization disabled");
+		}
 		
         // Set up Slack communications
         new Slack(config);

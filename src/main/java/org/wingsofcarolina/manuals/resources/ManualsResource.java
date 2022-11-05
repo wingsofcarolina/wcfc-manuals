@@ -1,6 +1,5 @@
 package org.wingsofcarolina.manuals.resources;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -16,7 +15,6 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.file.Paths;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -24,7 +22,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -48,12 +45,12 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Cookie;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
-
 import com.palantir.roboslack.api.MessageRequest;
 import com.palantir.roboslack.api.attachments.Attachment;
 import com.palantir.roboslack.api.attachments.Attachment.Builder;
@@ -62,6 +59,10 @@ import com.palantir.roboslack.api.attachments.components.Color;
 import com.palantir.roboslack.api.attachments.components.Field;
 import com.palantir.roboslack.api.attachments.components.Footer;
 import com.palantir.roboslack.api.attachments.components.Title;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
+
 import com.dropbox.core.DbxException;
 import com.dropbox.core.v2.files.ListFolderErrorException;
 import com.fasterxml.jackson.core.JsonParseException;
@@ -109,7 +110,6 @@ public class ManualsResource {
 	private SlackAuthService slackAuth;
 
 	private AuthUtils authUtils;
-	private boolean authEnabled = false;
 	
 	private Integer authCount = 0;
 	private Integer accessCount = 0;
@@ -137,9 +137,6 @@ public class ManualsResource {
 		// Create authentication and access logs
 		authLog = new SimpleLogger("authentication", config);
 		accessLog = new SimpleLogger("access", config);
-		
-		// See if we have turned auth on
-		authEnabled = config.getAuth();
 		
 		// See if we have a mock user
 		if (config.getMockUser() != null) {
@@ -213,12 +210,14 @@ public class ManualsResource {
 	@GET
 	@Path("user")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response user(@CookieParam("wcfc.manuals.token") Cookie cookie) {
+	public Response user(@CookieParam("wcfc.manuals.token") Cookie cookie,
+			@Context HttpHeaders httpHeaders) {
 		User user = null;
 		Boolean anonymous = false;
+		Boolean badcookie = false;
         Map<String, Object> reply = new HashMap<String, Object>();
-
-        if (authEnabled) {
+        
+        if (config.getAuth() == true) {
         	user = authUtils.getUserFromCookie(cookie);
 		} else {
 			if ( mockUser == null) {
@@ -229,7 +228,15 @@ public class ManualsResource {
 			}
 		}
 
-        if (user != null) {
+        if (cookie != null) {
+	        Jws<Claims> claims = authUtils.decodeCookie(cookie);
+			if (claims.getBody().get("version") == null && user.getEmail().equals("dwight@openweave.org")) {
+				badcookie = true;
+			}
+        } else {
+        	badcookie = true;
+        }
+        if (user != null && badcookie == false) {
 	        reply.put("name", user.getName());
 	        reply.put("email", user.getEmail());
 	        reply.put("admin", user.getAdmin());

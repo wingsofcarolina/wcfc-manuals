@@ -90,6 +90,7 @@ public class AuthUtils {
 		claims.put("userId", user.getUserId());
 		claims.put("teamId", user.getTeamId());
 		claims.put("accessToken", user.getAccess_token());
+		claims.put("version", 1);
 		
 		// Hard-code some authorized users
 		if (user.getEmail().equals("dfrye@planez.co") || user.getEmail().equals("george.scheer@gmail.com")) {
@@ -119,7 +120,7 @@ public class AuthUtils {
 		User user = null;
 		
 		// If auth is not enabled, hard-code it to Dwight
-		if ( ! ManualsConfiguration.instance().getAuth()) {
+		if (ManualsConfiguration.instance().getAuth() == false) {
 			user = new User("Dwight Frye", "dwight@openweave.org");
 		}
 
