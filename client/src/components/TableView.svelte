@@ -22,13 +22,36 @@
 	let aircraft_dialog;
 	let data = null;
 
+	let archive_details = null;
+
 	onMount(async () => {
 	  getUser();
+		getArchiveDetails();
 		getAircraftTypes();
 		getAircraft();
 		getEquipmentTypes();
 	  getEquipment();
 	});
+
+	const getArchiveDetails = async () => {
+	  const response = await fetch('/api/archive/details', {
+	    method: "get",
+	    withCredentials: true,
+	    headers: {
+	      'Accept': 'application/json'
+	    }
+	  });
+	  if (!response.ok) {
+	    if (response.status == 401) {
+	      console.log('User not authenticated, redirecting to Slack');
+	      goto('login');
+	    } else {
+				archive_details = null;
+	    }
+	  } else {
+	    archive_details = await response.json();
+	  }
+	}
 
 	const getAircraft = async () => {
 	  const response = await fetch('/api/aircraft', {
@@ -39,7 +62,6 @@
 	    }
 	  });
 	  if (!response.ok) {
-			console.log('Status : ', status);
 	    if (response.status == 401) {
 	      console.log('User not authenticated, redirecting to Slack');
 	      goto('login');
@@ -193,6 +215,9 @@
 
 			document.body.style.cursor='default';
 			document.getElementById('wait').style.visibility = 'hidden';
+
+			// Reload the new archive name
+			getArchiveDetails();
 		}
 	}
 
@@ -300,7 +325,17 @@
 		</table>
 
 		<p>
-		<center><a href="wcfc-manuals.zip">Download Full Manual Archive</a></center>
+		<center>
+			{#if archive_details}
+				<a href="{archive_details["name"]}">
+					Download Full Manual Archive // {archive_details["name"]}<br>
+					<div class="archive_details">Created : {archive_details["created"]}</div>
+					<div class="archive_details">Size : {archive_details["size"]}</div>
+				</a>
+			{:else}
+					<div class="archive_details">There is no archive available at this time.</div>
+			{/if}
+		</center>
 	{/if}
 
 	<UploadDialog bind:this="{upload_dialog}" on:modify on:message={refresh}/>
@@ -313,6 +348,12 @@
 	</div>
 
 <style>
+.archive_details {
+	padding-right: 10px;
+	padding-left: 10px;
+	display: inline-block;
+	color: blue;
+}
 #wait {
 	visibility: hidden;
 	position: fixed;

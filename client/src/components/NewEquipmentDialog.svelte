@@ -27,8 +27,6 @@
 
   const registerNewEquipment = async () => {
     visible = false;
-    console.log('Type : ', type);
-    console.log('Name : ', name);
 
     if (type == null || name == null) {
       notifier.danger("All values must be provided.")

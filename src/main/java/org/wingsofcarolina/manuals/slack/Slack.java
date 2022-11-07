@@ -14,11 +14,11 @@ import org.wingsofcarolina.manuals.ManualsConfiguration;
 public class Slack {
 	private static final Logger LOG = LoggerFactory.getLogger(Slack.class);
 	
-	public static enum Channel { NOTIFY };
+	public static enum Channel { NOTIFY, MANUALS };
 	
 	private static Slack instance = null;
 
-//	WebHookToken contact;
+	WebHookToken general;
 	WebHookToken notification;
 
 	private ManualsConfiguration config;
@@ -35,16 +35,16 @@ public class Slack {
 			throw new RuntimeException("Bad Slack #notification token, shutting down!");
 		}
 	
-//		tokenParts = config.getSlackContact().split("/");
-//		if (tokenParts.length == 3) {
-//			contact = WebHookToken.builder()
-//	                .partT(tokenParts[0])
-//	                .partB(tokenParts[1])
-//	                .partX(tokenParts[2])
-//	                .build();
-//		} else {
-//			throw new RuntimeException("Bad Slack #contact token, shutting down!");
-//		}
+		tokenParts = config.getSlackManuals().split("/");
+		if (tokenParts.length == 3) {
+			general = WebHookToken.builder()
+	                .partT(tokenParts[0])
+	                .partB(tokenParts[1])
+	                .partX(tokenParts[2])
+	                .build();
+		} else {
+			throw new RuntimeException("Bad Slack #contact token, shutting down!");
+		}
 		Slack.instance = this;
 		this.config = config;
 	}
@@ -97,7 +97,7 @@ public class Slack {
 		// Select the desired channel.
 		switch (channel) {
 			case NOTIFY : token = notification; break;
-//			case CONTACT: token = contact; break;
+			case MANUALS: token = general; break;
 			default: token = notification; break;
 		}
 		return token;

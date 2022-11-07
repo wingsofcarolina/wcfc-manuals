@@ -13,7 +13,7 @@ mockUser: ${MOCKUSER!'none'}
 
 # Slack channels
 slackNotify: ${SLACK!'T0H7FTUQK/B02LP23EURJ/d9iiJxMCsr03OBWgYsP4cf9E'}     # Targets #notification
-#slackContact: ${SLACK!'REDACTED/REDACTED'}    # Targets #contact
+slackManuals: ${SLACK!'T0H7FTUQK/B049U4ZG7TL/ct0vai5hEa4a4oA8GJAq97ep'}    # Targets #manuals
 
 # Configure ports used by DropWizard
 server:

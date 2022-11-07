@@ -19,7 +19,6 @@
 
 	onMount(async () => {
 	  getUser();
-		console.log($user);
 		if ($user == null) {
 			sleep(1000).then(() => {
 				if ($user == null || $user.anonymous) {

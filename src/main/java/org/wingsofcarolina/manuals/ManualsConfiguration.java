@@ -12,7 +12,7 @@ public class ManualsConfiguration extends Configuration {
 	@JsonProperty Boolean auth;
 	@JsonProperty String mockUser;
 	@JsonProperty String slackNotify;
-	@JsonProperty String slackContact;
+	@JsonProperty String slackManuals;
 
 	public ManualsConfiguration() {
 		ManualsConfiguration.instance = this;
@@ -38,8 +38,8 @@ public class ManualsConfiguration extends Configuration {
 		return slackNotify;
 	}
 
-	public String getSlackContact() {
-		return slackContact;
+	public String getSlackManuals() {
+		return slackManuals;
 	}
 
 	public String getMode() {

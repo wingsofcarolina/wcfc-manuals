@@ -13,8 +13,14 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
+import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
+import java.text.CharacterIterator;
 import java.text.ParseException;
+import java.text.StringCharacterIterator;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -28,10 +34,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -103,6 +112,7 @@ public class ManualsResource {
 	private static ManualsConfiguration config;
 	private static String versionOverride = null;
 	private DateTimeFormatter dateFormatGmt;
+	private DateTimeFormatter dateFormatArchive;
 
     // Slack credentials
     private static final String CLIENT_ID = "REDACTED";
@@ -120,6 +130,8 @@ public class ManualsResource {
 	
 	private ObjectMapper mapper;
 	
+	public static enum ManualType { AIRCRAFT, EQUIPMENT };
+
 	private static final String AIRCRAFT_JSON = "Aircraft.json";
 	private static final String EQUIPMENT_JSON = "Equipment.json";
 	
@@ -152,8 +164,9 @@ public class ManualsResource {
 		// For JSON serialization/deserialization
 		mapper = new ObjectMapper();
 		
-		// Get the startup date/time format in GMT
+		// Get the startup date/time format in GMT and for the archive
 		dateFormatGmt = DateTimeFormatter.ofPattern("yyyy/MM/dd - HH:mm:ss z");
+		dateFormatArchive = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 		
         // Create Slack authentication API service object
         slackAuth = new SlackAuthService(CLIENT_ID, CLIENT_SECRET);
@@ -236,7 +249,7 @@ public class ManualsResource {
         } else {
         	badcookie = true;
         }
-        if (user != null && badcookie == false) {
+        if (config.getAuth() == false || ( user != null && badcookie == false ) ) {
 	        reply.put("name", user.getName());
 	        reply.put("email", user.getEmail());
 	        reply.put("admin", user.getAdmin());
@@ -843,10 +856,13 @@ public class ManualsResource {
 	@Path("upload")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	@Produces(MediaType.TEXT_PLAIN)
-	public Response upload(@FormDataParam("identifier") String identifier,
+	public Response upload(@CookieParam("wcfc.manuals.token") Cookie cookie,
+			@FormDataParam("identifier") String identifier,
 			@FormDataParam("file") InputStream uploadedInputStream,
 			@FormDataParam("file") FormDataContentDisposition fileDetails)
 			throws IOException, CsvException, ParseException {
+		
+		User user = authUtils.getUserFromCookie(cookie);
 		
 		String path = identifier + ".pdf";
 	    File targetFile = new File(root + identifier + ".tmp");
@@ -870,13 +886,22 @@ public class ManualsResource {
 			}
 			FileUtils.moveFile(targetFile, newfile);
 			if (newfile.exists()) {
+				Aircraft aircraft = null;
+				Equipment equipment = null;
 				LOG.info("Creating : {}", newname);
 				
 				// Update appropriate data object and corresponding JSON file
-				if (updateAircraftStore(identifier)) {
+				if ((aircraft = updateAircraftStore(identifier)) != null) {
 					LOG.info("Aircraft store updated.");
-				} if (updateEquipmentStore(identifier)) {
+
+					// Let the world know a new file was uploaded for an aircraft
+			        Slack.instance().sendMessage(Slack.Channel.MANUALS, uploadMessage(user, ManualType.AIRCRAFT, aircraft.getRegistration()));
+				}
+				if ((equipment = updateEquipmentStore(identifier)) != null) {
 					LOG.info("Equipment store updated.");
+
+					// Let the world know a new file was uploaded
+			        Slack.instance().sendMessage(Slack.Channel.MANUALS, uploadMessage(user, ManualType.EQUIPMENT, equipment.getName()));
 				}
 
 				return Response.ok().build();
@@ -891,14 +916,45 @@ public class ManualsResource {
 	    }
 	}
 	
-	private boolean updateAircraftStore(String uuid) {
+	private MessageRequest uploadMessage(User user, ManualType type, String identifier) {
+		ZoneId zoneId = ZoneId.of("US/Eastern");
+		ZonedDateTime now = LocalDateTime.now().atZone(zoneId);
+		
+		String message = "none";
+		switch (type) {
+		case AIRCRAFT  : message = "A new POH for aircraft '" + identifier + "' has been uploaded by " + user.getName() + "."; break;
+		case EQUIPMENT : message = "A new equipment manual for '" + identifier + "' has been uploaded by " + user.getName() + "."; break;
+		}
+		
+		Builder ab = Attachment.builder()
+				.fallback("New manual for " + identifier + " has been uploaded.")
+				.author(Author.of(user.getName()))
+				.color(Color.good())
+				.title(Title.builder()
+						.text("New Manual Uploaded")
+					.build())
+				.text(message)
+				.footer(Footer.builder().text("Generated By WCFC Manuals Server")
+						.icon(url("https://platform.slack-edge.com/img/default_application_icon.png"))
+						.timestamp(now.toEpochSecond()).build());
+
+		MessageRequest msg = MessageRequest.builder().username("WCFC Manuals Server")
+				.channel("manuals")
+				.text("*WCFC Manuals Server notification sent at : " + dateFormatGmt.format(now) + "*") // + SlackMarkdown.EMOJI.decorate("new"))
+				.addAttachments(ab.build())
+				.build();
+
+		return msg;
+	}
+
+	private Aircraft updateAircraftStore(String uuid) {
 		Aircraft aircraft = getAircraftByUuid(uuid);
 		if (aircraft != null) {
 			aircraft.setHasDocument(true);
 			writeJson("Aircraft", aircraftCache);
-			return true;
+			return aircraft;
 		} else {
-			return false;
+			return null;
 		}
 	}
 
@@ -920,14 +976,14 @@ public class ManualsResource {
 		return null;
 	}
 	
-	private boolean updateEquipmentStore(String uuid) {
+	private Equipment updateEquipmentStore(String uuid) {
 		Equipment equipment = getEquipmentByUuid(uuid);
 		if (equipment != null) {
 			equipment.setHasDocument(true);
 			writeJson("Equipment", equipmentCache);
-			return true;
+			return equipment;
 		} else {
-			return false;
+			return null;
 		}
 	}
 	
@@ -952,16 +1008,72 @@ public class ManualsResource {
 	    }
 	    return fileTypeDefault;
 	}
+
+	@GET
+	@Path("archive/details")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response archiveDetails(@CookieParam("wcfc.manuals.token") Cookie cookie) throws IOException {
+		List<String> files = new ArrayList<>();
+		files.addAll(listFiles("dynamic"));
+		if (!files.isEmpty()) {
+			Map<String, String> result = new HashMap<String, String>();
+			// Provide the name ...
+			String filename = files.get(0);
+			result.put("name", filename);
+			java.nio.file.Path path = Paths.get("dynamic/" + filename);
+
+			// ... the creation time ...
+			BasicFileAttributes attr = Files.readAttributes(path, BasicFileAttributes.class);
+			long cTime = attr.creationTime().toMillis();
+			ZonedDateTime t = Instant.ofEpochMilli(cTime).atZone(ZoneId.of("UTC"));
+			result.put("created", dateFormatArchive.format(t));
+			// ... and the size.
+            long bytes = Files.size(path);
+            result.put("size", humanReadableByteCountBin(bytes));
+            
+			return Response.ok().entity(result).build();
+		} else {
+			return Response.status(404).build();
+		}
+	}
+
+	public static String humanReadableByteCountBin(long bytes) {
+	    long absB = bytes == Long.MIN_VALUE ? Long.MAX_VALUE : Math.abs(bytes);
+	    if (absB < 1024) {
+	        return bytes + " B";
+	    }
+	    long value = absB;
+	    CharacterIterator ci = new StringCharacterIterator("KMGTPE");
+	    for (int i = 40; i >= 0 && absB > 0xfffccccccccccccL >> i; i -= 10) {
+	        value >>= 10;
+	        ci.next();
+	    }
+	    value *= Long.signum(bytes);
+	    return String.format("%.1f %cb", value / 1024.0, ci.current());
+	}
 	
 	@GET
 	@Path("archive")
 	public Response archive(@CookieParam("wcfc.manuals.token") Cookie cookie) throws IOException {
+		String filename = "none";
+		String fullpath = "none";
+		ZonedDateTime now = LocalDateTime.now().atZone(ZoneId.of("US/Eastern"));
 		User user = authUtils.getUserFromCookie(cookie);
 		if (user != null) {
 			LOG.info("Starting new archive generation.");
+			
+			// Remove all the old files in the 'dynamic' directory (should only be one)
+			Set<String> files = listFiles("dynamic");
+			for (String name : files) {
+				File file = new File("dynamic/" + name);
+				file.delete();
+			}
+			
 			ZipOutputStream zipOut = null;
 			try {
-				FileOutputStream fout = new FileOutputStream(new File("dynamic/wcfc-manuals.zip"));
+				filename = "wcfc-manuals-" + dateFormatArchive.format(now) + ".zip";
+				fullpath = "dynamic/" + filename;
+				FileOutputStream fout = new FileOutputStream(new File(fullpath));
 				zipOut = new ZipOutputStream(fout);
 				
 				byte[] guidePage = generateGuidePage().toString().getBytes();
@@ -976,7 +1088,7 @@ public class ManualsResource {
 				addImage(zipOut, "WCFC-logo.jpg");
 				
 				// Now, write all the data files
-				addDataFiles(zipOut);
+//				addDataFiles(zipOut);
 			} catch (IOException ex) {
 				LOG.info("IOException during archive generation : {}", ex.getMessage());
 			} finally {
@@ -984,11 +1096,47 @@ public class ManualsResource {
 				zipOut.close();
 			}
 			LOG.info("New archive generation completed.");
+			
+			// Let the world know a new archive was generated
+            long bytes = Files.size(Paths.get(fullpath));
+	        Slack.instance().sendMessage(Slack.Channel.MANUALS, archiveMessage(user, filename, humanReadableByteCountBin(bytes)));
 
 			return Response.ok().build();
 		} else {
 			return Response.status(401).entity("Are you logged in??").build();
 		}
+	}
+	
+	private MessageRequest archiveMessage(User user, String filename, String size) {
+		ZoneId zoneId = ZoneId.of("US/Eastern");
+		ZonedDateTime now = LocalDateTime.now().atZone(zoneId);
+		
+		Builder ab = Attachment.builder()
+				.fallback("New manuals archive created.")
+				.author(Author.of(user.getName()))
+				.color(Color.good())
+				.title(Title.builder()
+					.text("Archive Updated")
+					.build())
+				.text("A new WCFC Manuals ZIP archive has been generated by " + user.getName() + ". The archive name is '" + filename + "' and it is " + size + " in size.")
+				.footer(Footer.builder().text("Generated By WCFC Manuals Server")
+						.icon(url("https://platform.slack-edge.com/img/default_application_icon.png"))
+						.timestamp(now.toEpochSecond()).build());
+
+		MessageRequest msg = MessageRequest.builder().username("WCFC Manuals Server")
+				.channel("manuals")
+				.text("*WCFC Manuals Server notification sent at : " + dateFormatGmt.format(now) + "*") // + SlackMarkdown.EMOJI.decorate("new"))
+				.addAttachments(ab.build())
+				.build();
+
+		return msg;
+	}
+
+	public Set<String> listFiles(String dir) {
+	    return Stream.of(new File(dir).listFiles())
+	      .filter(file -> !file.isDirectory())
+	      .map(File::getName)
+	      .collect(Collectors.toSet());
 	}
 	
 	private void addImage(ZipOutputStream zipOut, String filename) {

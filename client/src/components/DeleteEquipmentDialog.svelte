@@ -10,7 +10,6 @@
   var dialog_name;
 
   export const raise = (name, uuid) => {
-    console.log("Deleting '" + name + "' with id " + uuid);
     dialog_uuid = uuid;
     dialog_name = name;
     visible = true;
@@ -28,7 +27,6 @@
 
 
   	const deleteEquipment = async () => {
-  		console.log('Delete ---> ', dialog_uuid);
   		const response = await fetch('/api/equipment/' + dialog_uuid, {
         method: "delete",
         withCredentials: true,
