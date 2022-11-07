@@ -1088,7 +1088,7 @@ public class ManualsResource {
 				addImage(zipOut, "WCFC-logo.jpg");
 				
 				// Now, write all the data files
-//				addDataFiles(zipOut);
+				addDataFiles(zipOut);
 			} catch (IOException ex) {
 				LOG.info("IOException during archive generation : {}", ex.getMessage());
 			} finally {
