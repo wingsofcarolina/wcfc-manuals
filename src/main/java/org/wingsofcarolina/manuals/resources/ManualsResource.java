@@ -1076,7 +1076,7 @@ public class ManualsResource {
 				FileOutputStream fout = new FileOutputStream(new File(fullpath));
 				zipOut = new ZipOutputStream(fout);
 				
-				byte[] guidePage = generateGuidePage().toString().getBytes();
+				byte[] guidePage = generateGuidePage(filename).toString().getBytes();
 				ZipEntry zipEntry = new ZipEntry("index.html");
 				zipOut.putNextEntry(zipEntry);
 				zipOut.write(guidePage, 0, guidePage.length);
@@ -1223,23 +1223,25 @@ public class ManualsResource {
 		}
 	}
 	
-	private StringBuffer generateGuidePage() {
+	private StringBuffer generateGuidePage(String filename) {
 		
 		StringBuffer sb = new StringBuffer();
 		
-		sb.append("<div class='container'><div class='header'><img src='img/WCFC-logo.jpg'><span style='vertical-align: top'>WCFC Flight Manuals</span></div><hr>");
+		sb.append("<div class='container'><div class='header'><img src='img/WCFC-logo.jpg'>\n");
+		sb.append("<span style='vertical-align: top'>WCFC Flight Manuals</span></div>\n");
+		sb.append("<div class='header'><span style='font-size: 0.6em;'>Source : " + filename + "</span></div><hr>");
 		
 		// Output the aircraft type headers
-		sb.append("<table id='equipment'><tr><th class='blank'>&nbsp;</th>");
+		sb.append("<table id='equipment'><tr><th class='blank'>&nbsp;</th>\n");
 	    for(AircraftType t : EnumSet.allOf(AircraftType.class)) {
-	         sb.append("<th class='type' colspan=" + typeCount(t) + "><span class='label'>" + t.getLabel() + "</span></th>");
+	         sb.append("<th class='type' colspan=" + typeCount(t) + "><span class='label'>" + t.getLabel() + "</span></th>\n");
 	    }
 	    sb.append("</tr>");
 	    
 	    // Output the registration/aircraft headers
-	    sb.append("<tr><th>Equipment</th>");
+	    sb.append("<tr><th>Equipment</th>\n");
 	    for (Aircraft acft : aircraftCache) {
-	    	sb.append("<th class='reg'><a href='data/" + zipOutputName(acft.getUuid()) + "' target=_blank>" + acft.getRegistration() + "</a></th>");
+	    	sb.append("<th class='reg'><a href='data/" + zipOutputName(acft.getUuid()) + "' target=_blank>" + acft.getRegistration() + "</a></th>\n");
 	    }
 	    sb.append("</tr>");
 	    
