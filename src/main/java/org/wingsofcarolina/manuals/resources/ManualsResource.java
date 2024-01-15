@@ -827,7 +827,7 @@ public class ManualsResource {
 			String name = userMap.get("name");
 			String email = userMap.get("email");
 			
-			User user = new User(name, email, user_id, team_id, access_token);
+			User user = new User(name, email, access_token);
 			authLog.logUser(user);
 			authCount++;
 			
@@ -1328,7 +1328,7 @@ public class ManualsResource {
 	}
 	
 	private User mockUser() {
-		return new User("Dwight Frye", "dwight@openweave.org", "REDACTED", "REDACTED", "REDACTED");
+		return new User("Dwight Frye", "dwight@openweave.org");
 	}
 	
     private static URL url(String url) {

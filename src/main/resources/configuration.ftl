@@ -2,6 +2,14 @@
 
 root: ${ROOT!'./root'}
 
+# Location of the MongoDB server
+# If on a Docker network, just give the name of the MongoDB
+# container. Otherwise give the IP:PORT for the MongoDB process.
+mongodb: ${MONGODB!'mongodb://mongodb'}
+
+# URL of the server where the groundschool service is running
+manualsServer: ${MANUALSSERVER!'https://manuals.wingsofcarolina.org'}
+
 # Operational mode, DEV or PROD
 mode: ${MODE!'PROD'}
 
@@ -26,10 +34,10 @@ server:
     requestLog:
         appenders:
           - type: file
-            currentLogFilename: log/server-http.log
+            currentLogFilename: ${LOG_DIR!'/log'}/manuals-http.log
             threshold: ALL
             archive: true
-            archivedLogFilenamePattern: log/server-%i-%d-http.log
+            archivedLogFilenamePattern: ${LOG_DIR!'/log'}/manuals-%i-%d-http.log
             maxFileSize: 500MB
             archivedFileCount: 5
             timeZone: UTC
@@ -49,10 +57,10 @@ logging:
         timeZone: UTC
         target: stdout
       - type: file
-        currentLogFilename: ./log/server.log
+        currentLogFilename: ${LOG_DIR!'/log'}/manuals.log
         threshold: ALL
         archive: true
-        archivedLogFilenamePattern: ./log/server-%i-%d.log
+        archivedLogFilenamePattern: ${LOG_DIR!'/log'}/manuals-%i-%d.log
         maxFileSize: 500MB
         archivedFileCount: 5
         timeZone: UTC

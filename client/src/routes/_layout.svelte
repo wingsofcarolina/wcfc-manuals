@@ -33,5 +33,5 @@ footer {
 	<slot></slot>
 </main>
 <footer>
-	<p>Copyright &copy; 2022, Wings of Carolina; All rights reserved.</p>
+	<p>Copyright &copy; 2024, Wings of Carolina; All rights reserved.</p>
 </footer>

@@ -9,10 +9,12 @@ import javax.servlet.FilterRegistration;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import org.wingsofcarolina.manuals.persistence.Persistence;
+import org.wingsofcarolina.manuals.email.EmailLogin;
 import org.wingsofcarolina.manuals.common.RuntimeExceptionMapper;
 import org.wingsofcarolina.manuals.healthcheck.MinimalHealthCheck;
 import org.wingsofcarolina.manuals.resources.ManualsResource;
+import org.wingsofcarolina.manuals.resources.MembersResource;
 import org.wingsofcarolina.manuals.slack.Slack;
 
 import de.thomaskrille.dropwizard_template_config.TemplateConfigBundle;
@@ -73,6 +75,12 @@ public class ManualsService extends Application<ManualsConfiguration> {
 		// Configure to allow CORS
 		configureCors(env);
 		
+		// Set up the Persistence singleton
+		new Persistence().initialize(config.getMongodb());
+		
+		// Make sure the email class knows the right server to reference
+		EmailLogin.initialize(config.getManualsServer());
+
 		// Set exception mappers
 		if (config.getMode().contentEquals("PROD")) {
 			env.jersey().register(new RuntimeExceptionMapper());
@@ -80,6 +88,7 @@ public class ManualsService extends Application<ManualsConfiguration> {
 
 		// Now set up the API
 		env.jersey().register(new ManualsResource(config));
+		env.jersey().register(new MembersResource(config));
 		env.healthChecks().register("check", new MinimalHealthCheck());
 	}
 	

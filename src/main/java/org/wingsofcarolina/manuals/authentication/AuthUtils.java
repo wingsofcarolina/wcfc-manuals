@@ -87,17 +87,9 @@ public class AuthUtils {
 		claims.setIssuedAt(new Date());
 		claims.setSubject(user.getName());
 		claims.put("email", user.getEmail());
-		claims.put("userId", user.getUserId());
-		claims.put("teamId", user.getTeamId());
+		claims.put("admin", user.getAdmin());
 		claims.put("accessToken", user.getAccess_token());
 		claims.put("version", 1);
-		
-		// Hard-code some authorized users
-		if (user.getEmail().equals("dfrye@planez.co") || user.getEmail().equals("george.scheer@gmail.com")) {
-			claims.put("admin", true);
-		} else {
-			claims.put("admin", true);
-		}
 		
 		String compactJws = Jwts.builder().setClaims(claims).signWith(SignatureAlgorithm.HS512, key).compact();
 
@@ -105,15 +97,13 @@ public class AuthUtils {
 	}
 
 	public NewCookie generateCookie(User user) {
-		boolean secure = ManualsConfiguration.instance().getMode().compareTo("DEV") == 0 ? false : true;
 		int maxAge = 86400*30;  // Seconds per day, times days to live
-		NewCookie cookie = new NewCookie("wcfc.manuals.token", generateToken(user), "/", "wingsofcarolina.org", "WCFC Manuals ID", maxAge, secure, true);
+		NewCookie cookie = new NewCookie("wcfc.manuals.token", generateToken(user), "/", null, "WCFC Manuals ID", maxAge, true, true);
 		return cookie;
 	}
 
 	public NewCookie removeCookie() {
-		boolean secure = ManualsConfiguration.instance().getMode().compareTo("DEV") == 0 ? false : true;
-		return new NewCookie("wcfc.manuals.token", null, "/", "wingsofcarolina.org", "WCFC Manuals ID", 0, secure, true);
+		return new NewCookie("wcfc.manuals.token", null, "/", null, "WCFC Manuals ID", 0, true, true);
 	}
 
 	public User getUserFromCookie(Cookie cookie) {
@@ -131,12 +121,10 @@ public class AuthUtils {
 			user = new User(
 					(String) body.getSubject(),
 					(String) body.get("email"),
-					(String) body.get("userId"),
-					(String) body.get("teamId"),
 					(String) body.get("accessToken")
 			);
 			
-			HashMap mymap = mapper.convertValue(body, HashMap.class);
+			HashMap<?, ?> mymap = mapper.convertValue(body, HashMap.class);
 
 			if (mymap.containsKey("admin") || ! ManualsConfiguration.instance().getAuth()) {
 				user.setAdmin((Boolean) body.get("admin"));

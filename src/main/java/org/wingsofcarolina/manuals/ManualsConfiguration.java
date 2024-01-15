@@ -13,6 +13,8 @@ public class ManualsConfiguration extends Configuration {
 	@JsonProperty String mockUser;
 	@JsonProperty String slackNotify;
 	@JsonProperty String slackManuals;
+	@JsonProperty String mongodb;
+	@JsonProperty String manualsServer;
 
 	public ManualsConfiguration() {
 		ManualsConfiguration.instance = this;
@@ -44,6 +46,14 @@ public class ManualsConfiguration extends Configuration {
 
 	public String getMode() {
 		return mode;
+	}
+
+	public String getMongodb() {
+		return mongodb;
+	}
+	
+	public String getManualsServer() {
+		return manualsServer;
 	}
 
 	public String getGs() {

@@ -13,7 +13,7 @@ export const getUser = async () => {
   });
   if (!response.ok) {
     if (response.status == 404) {
-      // User was simpoly not found, therefore not authenticated
+      // User was simply not found, therefore not authenticated
       user.set(null);
     } else {
       // Otherwise, something else went wrong

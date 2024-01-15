@@ -1,24 +1,27 @@
 package org.wingsofcarolina.manuals.model;
 
+import org.wingsofcarolina.manuals.domain.Person;
 
 public class User {
 	private String name;
 	private String email;
-	private String userId;
-	private String teamId;
 	private String access_token;
 	private Boolean admin = false;
 	
-	public User(String name, String email, String userId, String teamId, String access_token) {
+	public User(Person person) {
+		this.name = person.getName();
+		this.email = person.getEmail();
+		this.admin = person.isAdmin();
+	}
+	
+	public User(String name, String email, String access_token) {
 		this.name = name;
 		this.email = email;
-		this.userId = userId;
-		this.teamId = teamId;
 		this.access_token = access_token;
 	}
 
 	public User(String name, String email) {
-		this(name, email, null, null, null);
+		this(name, email, null);
 	}
 
 	public String getName() {
@@ -44,14 +47,6 @@ public class User {
 		this.admin = admin;
 	}
 	
-	public String getUserId() {
-		return userId;
-	}
-
-	public String getTeamId() {
-		return teamId;
-	}
-
 	public String getAccess_token() {
 		return access_token;
 	}
@@ -61,13 +56,13 @@ public class User {
 		if ( ! details.equals("none") ) {
 			String items[] = details.split(":");
 			
-			mock = new User(items[0], items[1], null, null, null);
+			mock = new User(items[0], items[1], null);
 		}
 		return mock;
 	}
 
 	@Override
 	public String toString() {
-		return "User [name=" + name + ", email=" + email + "]";
+		return "User [name=" + name + ", email=" + email + ", admin=" + admin + "]";
 	}
 }

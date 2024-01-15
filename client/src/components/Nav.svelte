@@ -2,8 +2,8 @@
 	import { goto } from '@sapper/app';
   import { NotificationDisplay } from '@beyonk/svelte-notifications'
   import { user, adminState } from '../store.js'
-	import MediaQuery from "svelte-media-query";
   import Switch from '../components/Switch.svelte'
+	import MediaQuery from "../components/MediaQuery.svelte";
 
 	export let segment;
 

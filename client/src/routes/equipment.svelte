@@ -1,11 +1,11 @@
 <script>
 	import { onMount } from 'svelte'
 	import { goto } from '@sapper/app'
-	import MediaQuery from "svelte-media-query";
 	import { user, adminState } from '../store.js'
 	import { getUser } from '../common.js'
 	import TreeView from '../components/TreeView.svelte'
 	import TableView from '../components/TableView.svelte'
+	import MediaQuery from "../components/MediaQuery.svelte";
 
 	let equipment = null;
 	let equipmentTypes = null;
