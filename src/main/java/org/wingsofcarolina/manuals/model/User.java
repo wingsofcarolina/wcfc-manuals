@@ -5,7 +5,6 @@ import org.wingsofcarolina.manuals.domain.Person;
 public class User {
 	private String name;
 	private String email;
-	private String access_token;
 	private Boolean admin = false;
 	
 	public User(Person person) {
@@ -14,14 +13,9 @@ public class User {
 		this.admin = person.isAdmin();
 	}
 	
-	public User(String name, String email, String access_token) {
+	public User(String name, String email) {
 		this.name = name;
 		this.email = email;
-		this.access_token = access_token;
-	}
-
-	public User(String name, String email) {
-		this(name, email, null);
 	}
 
 	public String getName() {
@@ -47,16 +41,12 @@ public class User {
 		this.admin = admin;
 	}
 	
-	public String getAccess_token() {
-		return access_token;
-	}
-
 	public static User userFromMock(String details) {
 		User mock = null;
 		if ( ! details.equals("none") ) {
 			String items[] = details.split(":");
 			
-			mock = new User(items[0], items[1], null);
+			mock = new User(items[0], items[1]);
 		}
 		return mock;
 	}

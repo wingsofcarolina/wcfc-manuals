@@ -23,6 +23,17 @@ mockUser: ${MOCKUSER!'none'}
 slackNotify: ${SLACK!'T0H7FTUQK/B02LP23EURJ/d9iiJxMCsr03OBWgYsP4cf9E'}     # Targets #notification
 slackManuals: ${SLACK!'T0H7FTUQK/B049U4ZG7TL/ct0vai5hEa4a4oA8GJAq97ep'}    # Targets #manuals
 
+# Configure the Sundial job management system    
+sundial:
+  thread-pool-size: 10
+  shutdown-on-unload: true
+  start-delay-seconds: 0
+  start-scheduler-on-load: true
+  global-lock-on-load: false
+  annotated-jobs-package-name: org.wingsofcarolina.manuals.jobs
+  tasks: [startjob, stopjob]
+
+
 # Configure ports used by DropWizard
 server:
     type: simple

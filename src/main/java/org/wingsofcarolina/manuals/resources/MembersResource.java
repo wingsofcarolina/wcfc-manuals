@@ -1,12 +1,10 @@
 package org.wingsofcarolina.manuals.resources;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -18,33 +16,27 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Cookie;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 import com.dropbox.core.DbxException;
 import com.dropbox.core.v2.files.ListFolderErrorException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import org.apache.commons.io.FileUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wingsofcarolina.manuals.model.Aircraft;
-import org.wingsofcarolina.manuals.model.Equipment;
 import org.wingsofcarolina.manuals.model.User;
-import org.wingsofcarolina.manuals.resources.ManualsResource.ManualType;
-import org.wingsofcarolina.manuals.slack.Slack;
 import org.wingsofcarolina.manuals.domain.Admin;
-import org.wingsofcarolina.manuals.domain.Person;
 import org.wingsofcarolina.manuals.domain.Member;
 import org.wingsofcarolina.manuals.domain.VerificationCode;
 import org.wingsofcarolina.manuals.email.EmailLogin;
 import org.wingsofcarolina.manuals.members.MemberListXLS;
 import org.wingsofcarolina.manuals.ManualsConfiguration;
+import org.wingsofcarolina.manuals.SimpleLogger;
 import org.wingsofcarolina.manuals.authentication.AuthUtils;
-import org.wingsofcarolina.manuals.common.APIException;
 
 /**
  * @author dwight
@@ -53,11 +45,15 @@ import org.wingsofcarolina.manuals.common.APIException;
 @Path("/member")	// Note that this is actually accessed as /api/member due to the setUrPattern() call in parent service
 public class MembersResource {
 	private static final Logger LOG = LoggerFactory.getLogger(MembersResource.class);
+	private static final String WCFC_TOKEN = "adfasd58df57a8adf68dsafd"; 
 	
 	private static ManualsConfiguration config;
+	private static SimpleLogger authLog;
 
 	private User mockUser;
 	private AuthUtils authUtils;
+
+	private Integer authCount = 0;
 
 	@SuppressWarnings("static-access")
 	public MembersResource(ManualsConfiguration config) throws IOException, ListFolderErrorException, DbxException {
@@ -70,6 +66,9 @@ public class MembersResource {
 		
 		// Get authorization utils object instance
 		authUtils = AuthUtils.instance();
+
+		// Create auth logger
+		authLog = new SimpleLogger("authentication", config);
 	}
 
 	@GET
@@ -92,38 +91,28 @@ public class MembersResource {
 	}
 	
 	@GET
-	@Path("verify/{uuid}/{code}")
-	@Produces(MediaType.TEXT_HTML)
-	public Response verify(@CookieParam("wcfc.manuals.token") Cookie cookie,
-			@PathParam("uuid") String uuid,
-			@PathParam("code") Integer code) throws URISyntaxException, APIException {
-
-
-		User user = AuthUtils.instance().getUserFromCookie(cookie);
-		if (user == null) {
-			NewCookie newcookie = null;
+	@Path("verify/{code}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response verify(@PathParam("code") Integer code) {
+		
+		VerificationCode vc = VerificationCode.getByCode(code);
+		if (vc != null) {
+			// Remove used verification codes
+			vc.delete();
 			
-			LOG.info("Code : {}   UUID: {}", code, uuid);
-			VerificationCode verify = VerificationCode.getByPersonUUID(uuid);
-			if (verify != null) {
-				Person person = Person.getPerson(uuid);
-				LOG.info("Authenticated user {}, admin == {}", person.getName(), person.isAdmin());
-				newcookie = authUtils.generateCookie(new User(person));
-				verify.setVerified(true);
-				verify.save();
+			Member member = Member.getByUUID(vc.getUUID());
+			if (member != null) {
+				User user = new User(member.getName(), member.getEmail());
+				authLog.logUser(user);
+				authCount++;
+				
+				// User authenticated and identified. Save the info.
+				NewCookie cookie = authUtils.generateCookie(user);
+				return Response.ok().header("Set-Cookie", AuthUtils.sameSite(cookie)).build();
 			}
-
-			// User authenticated and identified. Save the info.
-			if (newcookie != null) {
-				return Response.seeOther(new URI("/equipment")).header("Set-Cookie", AuthUtils.sameSite(newcookie)).build();
-			} else {
-				LOG.info("Failed to verify {} with code {}", uuid, code);
-				return Response.seeOther(new URI("/failure")).build();
-			}
-		} else {
-			LOG.info("{} clicked on the URL again!", user);
-			return Response.seeOther(new URI("/")).build();
 		}
+	
+		return Response.status(404).build();
 	}
 	
 	@GET
@@ -141,21 +130,22 @@ public class MembersResource {
 	@Path("populate")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	@Produces(MediaType.TEXT_PLAIN)
-	public Response upload(@CookieParam("wcfc.manuals.token") Cookie cookie,
+	public Response populate(@Context HttpHeaders httpHeaders, 
 			@FormDataParam("members") InputStream uploadedInputStream,
 			@FormDataParam("members") FormDataContentDisposition fileDetails)
 			throws Exception {
 		
-		User user = authUtils.getUserFromCookie(cookie);
-		
-		MemberListXLS members = new MemberListXLS(uploadedInputStream);
-		members.clean();
-		
-		Iterator<Entry<Integer, Member>> iterator = members.members().entrySet().iterator();
-		while (iterator.hasNext()) {
-			Map.Entry<Integer, Member> entry = iterator.next();
-			Member member = entry.getValue();
-			member.save();
+		String secret = httpHeaders.getHeaderString("X-WCFC-TOKEN");
+		if (secret.compareTo(WCFC_TOKEN) == 0) {
+			MemberListXLS members = new MemberListXLS(uploadedInputStream);
+			members.clean();
+			
+			Iterator<Entry<Integer, Member>> iterator = members.members().entrySet().iterator();
+			while (iterator.hasNext()) {
+				Map.Entry<Integer, Member> entry = iterator.next();
+				Member member = entry.getValue();
+				member.save();
+			}
 		}
 
 		return Response.ok().build();
@@ -163,18 +153,55 @@ public class MembersResource {
 
 	
 	@POST
+	@Path("add")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response createMember(@CookieParam("wcfc.manuals.token") Cookie cookie,
-			Map<String, String> request) {
-		String name = request.get("name");
-		String email = request.get("email");
-		Integer level = Integer.parseInt(request.get("email"));
-		Integer id = Integer.parseInt(request.get("id"));
-		
-		LOG.info("Trying to create {}, {}, {}, {}", name, email, id, level);
-		Member member = new Member(id, name, email, level);
-		member.save();
-		
-		return Response.ok().build();
+	public Response addMember(@Context HttpHeaders httpHeaders, Map<String, String> request) {
+		String secret = httpHeaders.getHeaderString("X-WCFC-TOKEN");
+		if (secret.compareTo(WCFC_TOKEN) == 0) {
+			String name = request.get("name");
+			String email = request.get("email");
+			Integer level = Integer.parseInt(request.get("level"));
+			Integer id = Integer.parseInt(request.get("id"));
+			
+			Member member = Member.getByEmail(email);
+			if (member == null) {
+				LOG.info("Creating : {}, {}, {}, {}", name, email, id, level);
+				member = new Member(id, name, email, level);
+				member.save();
+				
+				return Response.ok().entity(member).build();
+			} else {
+				Map<String, String> response = new HashMap<String, String>();
+				response.put("message", "Bad request, user already exists");
+				return Response.status(400).entity(response).build();
+			}
+		} else {
+			Map<String, String> response = new HashMap<String, String>();
+			response.put("message", "Not authorized");
+			return Response.status(401).entity(response).build();
+		}
+	}
+	
+	@POST
+	@Path("remove")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response removeMember(@Context HttpHeaders httpHeaders, Map<String, String> request) {
+		String secret = httpHeaders.getHeaderString("X-WCFC-TOKEN");
+		if (secret.compareTo(WCFC_TOKEN) == 0) {
+			String name = request.get("name");
+			String email = request.get("email");
+			
+			Member member = Member.getByEmail(email);
+			if (member != null) {
+				LOG.info("Removing : {}, {}", name, email);
+				member.delete();
+			}
+			
+			return Response.ok().entity(member).build();
+		} else {
+			Map<String, String> response = new HashMap<String, String>();
+			response.put("message", "Not authorized");
+			return Response.status(401).entity(response).build();
+		}
 	}
 }

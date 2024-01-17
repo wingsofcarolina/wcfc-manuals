@@ -28,7 +28,6 @@ public class VerificationCode {
 	private String uuid;
 	private Integer code;
 	private Date expire;
-	private Boolean verified = false;
 
 	public static String ID_KEY = "verification";
 
@@ -72,14 +71,6 @@ public class VerificationCode {
 		return expire;
 	}
 	
-	public Boolean getVerified() {
-		return verified;
-	}
-
-	public void setVerified(Boolean verified) {
-		this.verified = verified;
-	}
-
 	public static void cleanCache() {
 		Date now = new Date();
 		
@@ -94,10 +85,7 @@ public class VerificationCode {
             // Check if this entry has expired
             Date expire = entry.getExpire();
             if (now.compareTo(expire) > 0) {
-                // Remove this entry from database
-            	if (entry.getVerified() == false) {
-            		LOG.info("Removed unused {} from verification cache.", entry.getUUID());
-            	}
+            	LOG.info("Removed unused {} / {} from verification cache.", entry.getUUID(), entry.getCode());
                 entry.delete();
             }
         }
@@ -125,6 +113,10 @@ public class VerificationCode {
 	
 	public static VerificationCode getByPersonUUID(String uuid) {
 		return dao.getByPersonUUID(uuid);
+	}
+
+	public static VerificationCode getByCode(Integer code) {
+		return dao.getByCode(code);
 	}
 
 	public void save() {

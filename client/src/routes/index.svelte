@@ -49,17 +49,14 @@
 			<div class="narrow">
 
 				<p>Here you'll find all the manuals associated with the aircraft in the
-					WCFC fleet.  </p>
+				WCFC fleet. We are making this information available through this site
+				to support our members in their use of the aircraft in our fleet. </p>
 
-				<p>We are making this information available through this site to support
-				our members in their use of the aircraft in our fleet. </p>
-
-				<p>To access this material you should be logged into the WCFC Slack
-				workspace (for more information on Slack go to slack.com). This
-				website uses Slack to authenticate that you are a member of WCFC. If
-				you are not logged in already Slack may ask for your workspace name. If so,
-				enter <b>wcfc.slack.com</b>. If you have not already joined the WCFC Slack
-			  workspace, ask another member for an invitation.</p>
+				<p>To access this material you must be an active member of the Wings of
+				Carolina Flying Club. These items are restricted to club members due to
+				the fact that many of the items are copyrighted and therefore can be
+				made available to club members under "fair use" rules, but should not be
+				made generally available to the public at large.</p>
 
 				<p>The links in the navigation bar above will take you to the various
 				provided materials. If you have questions about the material use either

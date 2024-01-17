@@ -18,23 +18,12 @@
 	let tree = null;
 
 	onMount(async () => {
-	  getUser();
-		if ($user == null) {
-			sleep(1000).then(() => {
-				if ($user == null || $user.anonymous) {
-					goto('login');
-				}
-			})
-		} else if ( $user.anonymous ) {
+	  await getUser();
+		if ($user == null || $user.anonymous ) {
 			goto('login');
 		}
-
 		getTree();
 	});
-
-	const sleep = (milliseconds) => {
-	  return new Promise(resolve => setTimeout(resolve, milliseconds))
-	}
 
 	const getTree = async () => {
 		aircraft = null;
@@ -47,7 +36,7 @@
 	  });
 	  if (!response.ok) {
 	    if (response.status == 401) {
-	      console.log('User not authenticated, redirecting to Slack');
+	      console.log('User not authenticated, demanding authentication');
 	      goto('login');
 	    } else {
 	      notifier.danger('Retrieve of equipment list failed.');
@@ -75,9 +64,6 @@
 				<TreeView {tree} />
 	    {/if}
 	</MediaQuery>
-{:else}
-	Anonymous access to this material is prohibited. Contact the
-	<strong>Wings of Carolina</strong> for more information.
 {/if}
 
 <style>

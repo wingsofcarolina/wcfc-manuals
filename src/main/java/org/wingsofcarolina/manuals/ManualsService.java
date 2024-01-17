@@ -7,6 +7,8 @@ import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
 
 import org.eclipse.jetty.servlets.CrossOriginFilter;
+import org.knowm.dropwizard.sundial.SundialBundle;
+import org.knowm.dropwizard.sundial.SundialConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wingsofcarolina.manuals.persistence.Persistence;
@@ -43,6 +45,13 @@ public class ManualsService extends Application<ManualsConfiguration> {
 		bootstrap.addBundle(new TemplateConfigBundle(new TemplateConfigBundleConfiguration()));
     	bootstrap.addBundle(new AssetsBundle("/assets/", "/", "index.html"));
     	bootstrap.addBundle(new MultiPartBundle());
+        bootstrap.addBundle(new SundialBundle<ManualsConfiguration>() {
+            @Override
+            public SundialConfiguration getSundialConfiguration(ManualsConfiguration configuration) {
+              return configuration.getSundialConfiguration();
+            }
+          });
+
 	}
 
 	@Override

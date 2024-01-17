@@ -16,7 +16,6 @@ import java.nio.channels.FileLock;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.nio.file.attribute.FileTime;
 import java.text.CharacterIterator;
 import java.text.ParseException;
 import java.text.StringCharacterIterator;
@@ -53,10 +52,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Cookie;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
@@ -96,7 +92,6 @@ import org.wingsofcarolina.manuals.slack.SlackAuthService;
 import org.wingsofcarolina.manuals.ManualsConfiguration;
 import org.wingsofcarolina.manuals.SimpleLogger;
 import org.wingsofcarolina.manuals.authentication.AuthUtils;
-import org.wingsofcarolina.manuals.common.APIException;
 
 /**
  * @author dwight
@@ -106,7 +101,6 @@ import org.wingsofcarolina.manuals.common.APIException;
 public class ManualsResource {
 	private static final Logger LOG = LoggerFactory.getLogger(ManualsResource.class);
 	
-	private static SimpleLogger authLog;
 	private static SimpleLogger accessLog;
 
 	private static ManualsConfiguration config;
@@ -121,7 +115,6 @@ public class ManualsResource {
 
 	private AuthUtils authUtils;
 	
-	private Integer authCount = 0;
 	private Integer accessCount = 0;
 	
 	private static User mockUser = null; // When we are developing and don't want to authenticate with Slack
@@ -147,7 +140,6 @@ public class ManualsResource {
 		this.config = config;
 		
 		// Create authentication and access logs
-		authLog = new SimpleLogger("authentication", config);
 		accessLog = new SimpleLogger("access", config);
 		
 		// See if we have a mock user
@@ -203,28 +195,9 @@ public class ManualsResource {
 	}
 	
 	@GET
-	@Path("status")
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response stats(@CookieParam("wcfc.manuals.token") Cookie cookie) {
-		User user = AuthUtils.instance().getUserFromCookie(cookie);
-
-		if (user.getEmail().equals("dwight@openweave.org")) {
-			Map<String, Integer> reply = new HashMap<String, Integer>();
-			
-			reply.put("authCount", authCount);
-			reply.put("accessCount", accessCount);
-		
-		return Response.ok().entity(reply).build();
-		} else {
-			return Response.status(401).build();
-		}
-	}
-	
-	@GET
 	@Path("user")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response user(@CookieParam("wcfc.manuals.token") Cookie cookie,
-			@Context HttpHeaders httpHeaders) {
+	public Response user(@CookieParam("wcfc.manuals.token") Cookie cookie) {
 		User user = null;
 		Boolean anonymous = false;
 		Boolean badcookie = false;
@@ -807,37 +780,6 @@ public class ManualsResource {
 				.build();
 
 		return msg;
-	}
-	
-	@GET
-	@Path("auth")
-	@Produces(MediaType.TEXT_HTML)
-	@SuppressWarnings("unchecked")
-	public Response auth(@QueryParam("code") String code) throws URISyntaxException, APIException {
-		if (code != null) {
-			Map<String, Object> details = slackAuth.authenticate(code);
-			Map<String, Object> user_details = (Map<String, Object>)details.get("authed_user");
-			
-			String user_id = (String) user_details.get("id");
-			String access_token = (String) user_details.get("access_token");
-			String team_id = (String) ((Map<String, Object>)details.get("team")).get("id");
-	
-			Map<String, Object> identity = slackAuth.identity(access_token);
-			Map<String, String>userMap = (Map<String, String>) identity.get("user");
-			String name = userMap.get("name");
-			String email = userMap.get("email");
-			
-			User user = new User(name, email, access_token);
-			authLog.logUser(user);
-			authCount++;
-			
-			// User authenticated and identified. Save the info.
-			NewCookie cookie = authUtils.generateCookie(user);
-			return Response.seeOther(new URI("/equipment")).header("Set-Cookie", AuthUtils.sameSite(cookie)).build();
-		} else {
-			NewCookie cookie = authUtils.removeCookie();
-			return Response.seeOther(new URI("/")).header("Set-Cookie", AuthUtils.sameSite(cookie)).build();
-		}
 	}
 	
 	@GET

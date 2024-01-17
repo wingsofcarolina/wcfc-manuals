@@ -88,7 +88,6 @@ public class AuthUtils {
 		claims.setSubject(user.getName());
 		claims.put("email", user.getEmail());
 		claims.put("admin", user.getAdmin());
-		claims.put("accessToken", user.getAccess_token());
 		claims.put("version", 1);
 		
 		String compactJws = Jwts.builder().setClaims(claims).signWith(SignatureAlgorithm.HS512, key).compact();
@@ -120,8 +119,7 @@ public class AuthUtils {
 			
 			user = new User(
 					(String) body.getSubject(),
-					(String) body.get("email"),
-					(String) body.get("accessToken")
+					(String) body.get("email")
 			);
 			
 			HashMap<?, ?> mymap = mapper.convertValue(body, HashMap.class);
