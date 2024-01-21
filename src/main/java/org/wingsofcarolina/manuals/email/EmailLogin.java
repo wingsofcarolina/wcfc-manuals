@@ -26,7 +26,7 @@ public class EmailLogin {
 
 	// The HTML body for the email.
 	static final String HTMLBODY = "<html><div class=body>"
-			+ "<img src=https://groundschool.wingsofcarolina.org/WCFC-logo.jpg>"
+			+ "<img src=https://manuals.wingsofcarolina.org/WCFC-logo.jpg>"
 			+ "<div class=title>WCFC Manuals Login</div>"
 			+ "<p>This email contains a verification code you can use to log into the WCFC Manuals server. "
 			+ "This code is good for roughly 2 hours after which you will need to request another verification code. Once "

@@ -110,7 +110,7 @@ public class AuthUtils {
 		
 		// If auth is not enabled, hard-code it to Dwight
 		if (ManualsConfiguration.instance().getAuth() == false) {
-			user = new User("Dwight Frye", "dwight@openweave.org");
+			user = new User("Dwight Frye", "dfrye@planez.co");
 		}
 
 		if (cookie != null) {

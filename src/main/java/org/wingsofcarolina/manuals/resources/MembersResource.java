@@ -47,6 +47,7 @@ public class MembersResource {
 	private static final Logger LOG = LoggerFactory.getLogger(MembersResource.class);
 	private static final String WCFC_TOKEN = "adfasd58df57a8adf68dsafd"; 
 	
+	@SuppressWarnings("unused")
 	private static ManualsConfiguration config;
 	private static SimpleLogger authLog;
 
@@ -75,18 +76,22 @@ public class MembersResource {
 	@Path("email/{email}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response email(@PathParam("email") String email) {
-		Member member = Member.getByEmail(email.toLowerCase());
-		if (member != null) {
-			new EmailLogin().emailTo(email, member.getUUID());
-			return Response.ok().build();
-		} else {
-			Admin admin = Admin.getByEmail(email.toLowerCase());
-			if (admin !=null) {
-				new EmailLogin().emailTo(email, admin.getUUID());
+		if (email != null) {
+			Member member = Member.getByEmail(email.toLowerCase());
+			if (member != null) {
+				new EmailLogin().emailTo(email, member.getUUID());
 				return Response.ok().build();
+			} else {
+				Admin admin = Admin.getByEmail(email.toLowerCase());
+				if (admin !=null) {
+					new EmailLogin().emailTo(email, admin.getUUID());
+					return Response.ok().build();
+				}
 			}
+			LOG.info("Authentication for {}, person not found", email);
+		} else {
+			LOG.info("Somehow an empty/null email address was provided, failure.");
 		}
-		LOG.info("Authentication for {}, person not found", email);
 		return Response.status(404).build();
 	}
 	
@@ -97,19 +102,21 @@ public class MembersResource {
 		
 		VerificationCode vc = VerificationCode.getByCode(code);
 		if (vc != null) {
-			// Remove used verification codes
-			vc.delete();
-			
 			Member member = Member.getByUUID(vc.getUUID());
 			if (member != null) {
 				User user = new User(member.getName(), member.getEmail());
 				authLog.logUser(user);
 				authCount++;
 				
+				// Remove used verification codes
+				vc.delete();
+				
 				// User authenticated and identified. Save the info.
 				NewCookie cookie = authUtils.generateCookie(user);
 				return Response.ok().header("Set-Cookie", AuthUtils.sameSite(cookie)).build();
 			}
+		} else {
+			LOG.info("Verification of code {} failed, not found.", code);
 		}
 	
 		return Response.status(404).build();
