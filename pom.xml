@@ -64,37 +64,17 @@
 			<artifactId>dropwizard-template-config</artifactId>
 			<version>1.4.0</version>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
 		<dependency>
-			<groupId>com.slack.api</groupId>
-			<artifactId>slack-api-client</artifactId>
-			<version>1.6.0</version>
-		</dependency>
-		<!--
-		https://mvnrepository.com/artifact/com.palantir.roboslack/roboslack-webhook-api -->
-		<dependency>
-			<groupId>com.palantir.roboslack</groupId>
-			<artifactId>roboslack-webhook-api</artifactId>
-			<version>1.3.0</version>
-			<exclusions>
-				<exclusion>
-					<groupId>javax.ws.rs</groupId>
-					<artifactId>javax.ws.rs-api</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<!--
-		https://mvnrepository.com/artifact/com.palantir.roboslack/roboslack-api -->
-		<dependency>
-			<groupId>com.palantir.roboslack</groupId>
-			<artifactId>roboslack-api</artifactId>
-			<version>1.3.0</version>
-		</dependency>
-		<!--
-		https://mvnrepository.com/artifact/com.palantir.roboslack/roboslack-webhook -->
-		<dependency>
-			<groupId>com.palantir.roboslack</groupId>
-			<artifactId>roboslack-webhook</artifactId>
-			<version>1.3.0</version>
+		    <groupId>org.apache.httpcomponents</groupId>
+		    <artifactId>httpclient</artifactId>
+		    <version>4.5.14</version>
+		    <exclusions>
+		        <exclusion>
+		            <groupId>commons-logging</groupId>
+		            <artifactId>commons-logging</artifactId>
+		        </exclusion>
+		    </exclusions>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt -->
 		<!-- https://github.com/jwtk/jjwt -->
@@ -256,6 +236,7 @@
 		<plugins>
 			<plugin>
 				<artifactId>maven-antrun-plugin</artifactId>
+				<version>3.1.0</version>
 				<executions>
 					<execution>
 						<id>ant-magic</id>
@@ -264,11 +245,9 @@
 							<goal>run</goal>
 						</goals>
 						<configuration>
-							<tasks>
-								<exec dir="./client"
-									executable="/usr/local/bin/npx">
-									<arg
-										line="sapper export --entry '/ equipment login contact about'" />
+							<target>
+								<exec dir="./client" executable="npx">
+									<arg line="sapper export --entry '/ equipment login contact about'" />
 								</exec>
 								<delete dir="target/classes/assets" />
 								<copy todir="target/classes/assets">
@@ -281,7 +260,7 @@
 										<include name="*.pdf" />
 									</fileset>
 								</copy>
-							</tasks>
+							</target>
 						</configuration>
 					</execution>
 				</executions>
