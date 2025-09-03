@@ -12,6 +12,7 @@ public class AutoIncrement {
 
   @Id
   protected String key;
+
   protected long value = 1L;
 
   protected AutoIncrement() {
@@ -34,9 +35,9 @@ public class AutoIncrement {
   }
 
   public void setValue(Long value) {
-	  this.value = value;
+    this.value = value;
   }
-  
+
   public Long getValue() {
     return value;
   }
