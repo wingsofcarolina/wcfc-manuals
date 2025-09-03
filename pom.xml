@@ -371,6 +371,12 @@
 								<exclude>META-INF/*.RSA</exclude>
 							</excludes>
 						</filter>
+						<filter>
+							<artifact>commons-logging:commons-logging</artifact>
+							<excludes>
+								<exclude>**</exclude>
+							</excludes>
+						</filter>
 					</filters>
 					<transformers>
 						<transformer
