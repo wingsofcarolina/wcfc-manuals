@@ -14,5 +14,5 @@ format:
 
 .PHONY: clean
 clean:
-	rm -f target/
+	rm -rf target/
 
