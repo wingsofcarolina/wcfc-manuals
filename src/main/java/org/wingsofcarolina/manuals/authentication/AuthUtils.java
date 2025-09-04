@@ -5,13 +5,12 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.impl.DefaultClaims;
+import io.jsonwebtoken.security.Keys;
+import jakarta.ws.rs.core.Cookie;
+import jakarta.ws.rs.core.NewCookie;
 import java.util.Date;
 import java.util.HashMap;
-import javax.crypto.spec.SecretKeySpec;
-import javax.ws.rs.core.Cookie;
-import javax.ws.rs.core.NewCookie;
+import javax.crypto.SecretKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wingsofcarolina.manuals.ManualsConfiguration;
@@ -23,8 +22,7 @@ public class AuthUtils {
 
   private static AuthUtils instance = null;
 
-  // For SecretKeySpec generation
-  private String algorithm = "HmacSHA512";
+  // For SecretKey generation
   private byte[] encoded = {
     -8,
     -36,
@@ -92,13 +90,13 @@ public class AuthUtils {
     67,
   };
 
-  private SecretKeySpec key;
+  private SecretKey key;
   private JwtParser parser;
   private ObjectMapper mapper;
 
   public AuthUtils() {
-    key = new SecretKeySpec(encoded, algorithm);
-    parser = Jwts.parser().setSigningKey(key);
+    key = Keys.hmacShaKeyFor(encoded);
+    parser = Jwts.parser().verifyWith(key).build();
     mapper = new ObjectMapper();
   }
 
@@ -118,7 +116,7 @@ public class AuthUtils {
     return cookie.toString() + ";SameSite=none";
   }
 
-  public SecretKeySpec getKey() {
+  public SecretKey getKey() {
     return key;
   }
 
@@ -130,7 +128,7 @@ public class AuthUtils {
     Jws<Claims> claims = null;
     String compactJws = cookie.getValue();
     if (compactJws != null && !compactJws.isEmpty()) {
-      claims = parser.setSigningKey(key).parseClaimsJws(compactJws);
+      claims = parser.parseSignedClaims(compactJws);
     }
     return claims;
   }
@@ -140,17 +138,14 @@ public class AuthUtils {
     // https://github.com/jwtk/jjwt
     // https://stormpath.com/blog/jwt-java-create-verify
     // https://scotch.io/tutorials/the-anatomy-of-a-json-web-token
-    Claims claims = new DefaultClaims();
-    claims.setIssuedAt(new Date());
-    claims.setSubject(user.getName());
-    claims.put("email", user.getEmail());
-    claims.put("admin", user.getAdmin());
-    claims.put("version", 1);
-
     String compactJws = Jwts
       .builder()
-      .setClaims(claims)
-      .signWith(SignatureAlgorithm.HS512, key)
+      .issuedAt(new Date())
+      .subject(user.getName())
+      .claim("email", user.getEmail())
+      .claim("admin", user.getAdmin())
+      .claim("version", 1)
+      .signWith(key)
       .compact();
 
     return compactJws;

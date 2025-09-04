@@ -1,9 +1,9 @@
 package org.wingsofcarolina.manuals;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.dropwizard.Configuration;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
+import io.dropwizard.core.Configuration;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import org.knowm.dropwizard.sundial.SundialConfiguration;
 
 public class ManualsConfiguration extends Configuration {

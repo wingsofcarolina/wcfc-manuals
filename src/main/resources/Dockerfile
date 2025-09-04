@@ -1,4 +1,4 @@
-FROM azul/zulu-openjdk-alpine:19-latest
+FROM azul/zulu-openjdk-alpine:21-latest
 
 RUN apk update && apk add --no-cache curl less
 

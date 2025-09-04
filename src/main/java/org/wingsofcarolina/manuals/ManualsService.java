@@ -1,17 +1,17 @@
 package org.wingsofcarolina.manuals;
 
-import de.thomaskrille.dropwizard_template_config.TemplateConfigBundle;
-import de.thomaskrille.dropwizard_template_config.TemplateConfigBundleConfiguration;
-import io.dropwizard.Application;
 import io.dropwizard.assets.AssetsBundle;
+import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
+import io.dropwizard.configuration.SubstitutingSourceProvider;
+import io.dropwizard.core.Application;
+import io.dropwizard.core.setup.Bootstrap;
+import io.dropwizard.core.setup.Environment;
 import io.dropwizard.forms.MultiPartBundle;
-import io.dropwizard.setup.Bootstrap;
-import io.dropwizard.setup.Environment;
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.FilterRegistration;
 import java.text.SimpleDateFormat;
 import java.util.EnumSet;
 import java.util.TimeZone;
-import javax.servlet.DispatcherType;
-import javax.servlet.FilterRegistration;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
 import org.knowm.dropwizard.sundial.SundialBundle;
 import org.knowm.dropwizard.sundial.SundialConfiguration;
@@ -32,7 +32,7 @@ public class ManualsService extends Application<ManualsConfiguration> {
   public static void main(String[] args) throws Exception {
     LOG.info("Starting : WCFC Manuals Server");
     if (args.length < 2) {
-      new ManualsService().run(new String[] { "server", "configuration.ftl" });
+      new ManualsService().run(new String[] { "server", "configuration.yml" });
     } else {
       new ManualsService().run(args);
     }
@@ -40,10 +40,15 @@ public class ManualsService extends Application<ManualsConfiguration> {
 
   @Override
   public void initialize(Bootstrap<ManualsConfiguration> bootstrap) {
-    // bootstrap.addBundle(new AssetsBundle("/doc", "/doc", "index.html","html"));
-    bootstrap.addBundle(
-      new TemplateConfigBundle(new TemplateConfigBundleConfiguration())
+    // Enable environment variable substitution
+    bootstrap.setConfigurationSourceProvider(
+      new SubstitutingSourceProvider(
+        bootstrap.getConfigurationSourceProvider(),
+        new EnvironmentVariableSubstitutor(false)
+      )
     );
+
+    // bootstrap.addBundle(new AssetsBundle("/doc", "/doc", "index.html","html"));
     bootstrap.addBundle(new AssetsBundle("/assets/", "/", "index.html"));
     bootstrap.addBundle(new MultiPartBundle());
     bootstrap.addBundle(
