@@ -1,14 +1,15 @@
 package org.wingsofcarolina.manuals.persistence;
 
 import com.mongodb.client.MongoClients;
-import com.mongodb.client.result.UpdateResult;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.FindOneAndUpdateOptions;
+import com.mongodb.client.model.ReturnDocument;
 import dev.morphia.Datastore;
-// import co.planez.padawan.domain.dao.*;
 import dev.morphia.Morphia;
 import dev.morphia.query.Query;
 import dev.morphia.query.filters.Filters;
-import dev.morphia.query.updates.UpdateOperators;
 import java.util.List;
+import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wingsofcarolina.manuals.domain.*;
@@ -25,8 +26,9 @@ public class Persistence {
     if (instance == null) {
       LOG.info("Connecting to MongoDB with '{}'", mongodb);
       datastore = Morphia.createDatastore(MongoClients.create(mongodb), "manuals");
-      datastore.getMapper().mapPackage("dev.morphia.example");
-      datastore.ensureIndexes();
+
+      // Entity classes will be mapped automatically when first used in Morphia 2.5+
+      // No need for explicit mapping calls
 
       // Make this a singleton
       instance = this;
@@ -65,20 +67,26 @@ public class Persistence {
   }
 
   public long getID(final String key, final long minimumValue) {
-    AutoIncrement autoIncrement = null;
     Datastore ds = Persistence.instance().datastore();
-    Query<AutoIncrement> query = ds
-      .find(AutoIncrement.class)
-      .filter(Filters.eq("key", key));
-    UpdateResult results = query.update(UpdateOperators.inc("value", 1)).execute();
+
+    // Use MongoDB driver directly for atomic findOneAndUpdate operation
+    MongoCollection<Document> collection = ds.getDatabase().getCollection("IDs");
+
+    Document filter = new Document("_id", key);
+    Document update = new Document("$inc", new Document("value", 1));
+    FindOneAndUpdateOptions options = new FindOneAndUpdateOptions()
+      .returnDocument(ReturnDocument.AFTER)
+      .upsert(false);
+
+    Document result = collection.findOneAndUpdate(filter, update, options);
 
     // If none is found, we need to create one for the given key.
-    if (results.getModifiedCount() == 0) {
-      autoIncrement = new AutoIncrement(key, minimumValue);
+    if (result == null) {
+      AutoIncrement autoIncrement = new AutoIncrement(key, minimumValue);
       datastore.save(autoIncrement);
-    } else {
-      autoIncrement = query.iterator().toList().get(0);
+      return autoIncrement.getValue();
     }
-    return autoIncrement.getValue();
+
+    return result.getLong("value");
   }
 }
