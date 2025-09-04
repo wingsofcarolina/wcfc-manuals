@@ -1,7 +1,8 @@
 <script>
 	import Nav from '../components/Nav.svelte';
+	import { page } from '$app/stores';
 
-	export let segment;
+	$: segment = $page.route.id?.split('/')[1];
 </script>
 
 <style>

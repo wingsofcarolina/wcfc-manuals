@@ -233,12 +233,12 @@
             </goals>
             <configuration>
               <target>
-                <exec dir="./client" executable="npx">
-                  <arg line="sapper export --entry '/ equipment login contact about'"/>
+                <exec dir="./client" executable="npm">
+                  <arg line="run build"/>
                 </exec>
                 <delete dir="target/classes/assets"/>
                 <copy todir="target/classes/assets">
-                  <fileset dir="client/__sapper__/export">
+                  <fileset dir="client/.svelte-kit/output/client">
                     <include name="**"/>
                   </fileset>
                 </copy>

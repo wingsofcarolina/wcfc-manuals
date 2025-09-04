@@ -1,2 +1,2 @@
 #!/bin/bash
-npx sapper export 
+npm run build 

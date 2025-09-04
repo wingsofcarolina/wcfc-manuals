@@ -1,5 +1,5 @@
 <script>
-  import { notifier } from '@beyonk/svelte-notifications'
+  import * as notifier from '@beyonk/svelte-notifications/src/notifier.js'
   import { createEventDispatcher } from 'svelte';
 
   const dispatch = createEventDispatcher();

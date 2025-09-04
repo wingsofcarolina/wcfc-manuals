@@ -1,7 +1,7 @@
 <script>
 	import { onMount } from 'svelte';
-	import { goto } from '@sapper/app';
-	import { getUser } from '../common.js'
+	import { goto } from '$app/navigation';
+	import { getUser } from '../../common.js'
 
 	onMount(function() {
 		getUser();

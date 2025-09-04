@@ -1,10 +1,10 @@
 <script>
 	import { onMount } from 'svelte'
-	import { goto } from '@sapper/app'
+	import { goto } from '$app/navigation'
 	import { user, adminState } from '../store.js'
 	import { getUser } from '../common.js'
 	import { Circle2 } from 'svelte-loading-spinners'
-	import { notifier } from '@beyonk/svelte-notifications'
+	import * as notifier from '@beyonk/svelte-notifications/src/notifier.js'
 	import Checkmark from "../components/Checkmark.svelte";
 	import UploadDialog from "../components/UploadDialog.svelte";
 	import NewEquipmentDialog from "../components/NewEquipmentDialog.svelte";

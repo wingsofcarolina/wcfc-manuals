@@ -16,7 +16,7 @@ tokens/
 tmp/
 root/
 /node_modules/
-__sapper__/
+.svelte-kit/
 pom.xml.tag
 pom.xml.releaseBackup
 pom.xml.versionsBackup

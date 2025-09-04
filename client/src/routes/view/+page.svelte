@@ -1,7 +1,7 @@
 <script context="module" src='/lib/webviewer.min.js'></script>
 <script>
   import { onMount, createEventDispatcher } from 'svelte';
-  import { uuid } from '../store.js'
+  import { uuid } from '../../store.js'
 
   let instance = null;
   const dispatch = createEventDispatcher();

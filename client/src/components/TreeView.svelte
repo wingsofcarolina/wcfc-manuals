@@ -32,7 +32,7 @@
 </script>
 
 <script>
-	import { goto } from '@sapper/app'
+	import { goto } from '$app/navigation'
 	import { Circle2 } from 'svelte-loading-spinners'
 	import { uuid } from '../store.js'
 

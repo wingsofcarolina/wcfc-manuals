@@ -1,5 +1,5 @@
 <script>
-	import { goto } from '@sapper/app';
+	import { goto } from '$app/navigation';
 
 	export let status;
 	export let error;

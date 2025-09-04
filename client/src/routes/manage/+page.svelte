@@ -1,11 +1,11 @@
 <script>
 	import { onMount } from 'svelte'
-	import { goto } from '@sapper/app'
-	import { user, adminState } from '../store.js'
-	import { getUser } from '../common.js'
+	import { goto } from '$app/navigation'
+	import { user, adminState } from '../../store.js'
+	import { getUser } from '../../common.js'
 	import { Circle2 } from 'svelte-loading-spinners'
-	import Checkmark from "../components/Checkmark.svelte";
-	import UploadDialog from "../components/UploadDialog.svelte";
+	import Checkmark from "../../components/Checkmark.svelte";
+	import UploadDialog from "../../components/UploadDialog.svelte";
 
 	let equipment = null;
 	let equipmentTypes = null;

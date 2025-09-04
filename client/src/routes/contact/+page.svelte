@@ -1,9 +1,9 @@
 <script>
 	import { onMount } from 'svelte';
-	import { goto } from '@sapper/app';
-	import { notifier } from '@beyonk/svelte-notifications'
-	import { user } from '../store.js'
-	import { getUser } from '../common.js'
+	import { goto } from '$app/navigation';
+	import * as notifier from '@beyonk/svelte-notifications/src/notifier.js'
+	import { user } from '../../store.js'
+	import { getUser } from '../../common.js'
 
 	let name = null;
 	let email = null;
