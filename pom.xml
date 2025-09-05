@@ -364,8 +364,8 @@
                 <exclude>META-INF/LICENSE</exclude>
                 <exclude>META-INF/LICENSE.txt</exclude>
                 <exclude>META-INF/LICENSE.md</exclude>
-		<exclude>META-INF/DEPENDENCIES</exclude>
-		<exclude>META-INF/kotlin-project-structure-metadata.json</exclude>
+                <exclude>META-INF/DEPENDENCIES</exclude>
+                <exclude>META-INF/kotlin-project-structure-metadata.json</exclude>
                 <exclude>META-INF/native-image/native-image.properties</exclude>
                 <exclude>META-INF/native-image/reflect-config.json</exclude>
               </excludes>

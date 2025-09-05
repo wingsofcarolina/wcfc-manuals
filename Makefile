@@ -11,12 +11,13 @@ client/node_modules: client/package.json client/package-lock.json
 .PHONY: format
 format:
 	@echo Formatting pom.xml files...
-	@find . -name pom.xml -exec xmllint --format --output {} {} \;
+	@find . -name pom.xml -print0 | xargs -0 -I{} bash -c 'xmllint --format --output {} {}'
 	@echo Formatting Java files...
 	@mvn prettier:write -q
 
 .PHONY: check-format
 check-format:
+	@find . -name pom.xml -print0 | xargs -0 -I{} bash -c 'xmllint --format {} | diff -q - {} > /dev/null'
 	@mvn prettier:check -q
 
 .PHONY: clean
