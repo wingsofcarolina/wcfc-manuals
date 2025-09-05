@@ -62,21 +62,45 @@
 
 {#if $user &&  $adminState == 'on' && ! $user.anonymous}
   {#if equipedWith() }
-    <td class='control'><img src='checkmark-red.png' alt='+' on:click={removeEquipment}></td>
+    <td class='control'>
+      <button type="button" class="icon-button" on:click={removeEquipment} aria-label="Remove equipment">
+        <img src='checkmark-red.png' alt='' aria-hidden="true">
+      </button>
+    </td>
   {:else}
-    <td class='control'><img src='unchecked-red.png' alt='x' on:click={addEquipment}></td>
+    <td class='control'>
+      <button type="button" class="icon-button" on:click={addEquipment} aria-label="Add equipment">
+        <img src='unchecked-red.png' alt='' aria-hidden="true">
+      </button>
+    </td>
   {/if}
 {:else}
   {#if equipedWith() }
-    <td class='label'><img src='checkmark.png' alt='+'></td>
+    <td class='label'><img src='checkmark.png' alt='Equipment installed'></td>
   {:else}
-    <td class='label'><img src='unchecked.png' alt='x'></td>
+    <td class='label'><img src='unchecked.png' alt='Equipment not installed'></td>
   {/if}
 {/if}
 
 <style>
-.label {}
 .control {
   cursor: pointer;
+}
+
+.icon-button {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: inline-block;
+}
+
+.icon-button:focus {
+  outline: 2px solid #005fcc;
+  outline-offset: 2px;
+}
+
+.icon-button img {
+  display: block;
 }
 </style>

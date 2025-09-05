@@ -77,12 +77,14 @@
 <ul><!-- transition:slide -->
 	<li>
 		{#if children}
-			<span class="arrow" class:arrowDown on:click={toggleExpansion}>
-				<img src="folder.png" alt="">
+			<button type="button" class="arrow" class:arrowDown on:click={toggleExpansion} aria-label="Toggle folder {label}">
+				<img src="folder.png" alt="" aria-hidden="true">
 				<span class='label'>{label}</span>
-			</span>
+			</button>
 			{#if link}
-				<img src='document.png' alt='Document' on:click={() => fetchFile(link)}>
+				<button type="button" class="document-button" on:click={() => fetchFile(link)} aria-label="Open document for {label}">
+					<img src='document.png' alt='' aria-hidden="true">
+				</button>
 			{/if}
 
 			{#if expanded}
@@ -95,7 +97,9 @@
 				<span class="no-arrow"/>
 				{#if link}
 					<span class='label'>{label}</span>
-					<img src='document.png' alt='Document' on:click={() => fetchFile(link)}>
+					<button type="button" class="document-button" on:click={() => fetchFile(link)} aria-label="Open document {label}">
+						<img src='document.png' alt='' aria-hidden="true">
+					</button>
 				{:else}
 					{label}
 				{/if}
@@ -116,9 +120,6 @@
 	  left: 50%;
 	  transform: translate(-50%, -50%);
 	}
-	img {
-		cursor: pointer;
-	}
 	ul {
 		margin: 0;
 		list-style: none;
@@ -130,7 +131,27 @@
 	.arrow {
 		cursor: pointer;
 		display: inline-block;
+		background: none;
+		border: none;
+		padding: 0;
 		/* transition: transform 200ms; */
 	}
-	.arrowDown {  } /* transform: rotate(90deg); */
+	.arrow:focus {
+		outline: 2px solid #005fcc;
+		outline-offset: 2px;
+	}
+	.document-button {
+		background: none;
+		border: none;
+		padding: 0;
+		cursor: pointer;
+		margin-left: 5px;
+	}
+	.document-button:focus {
+		outline: 2px solid #005fcc;
+		outline-offset: 2px;
+	}
+	.document-button img, .arrow img {
+		cursor: pointer;
+	}
 </style>

@@ -188,10 +188,10 @@
 				{#each aircraft as {registration, uuid, hasDocument } }
 					<th class=reg>
 						{#if $user &&  $adminState == 'on' && ! $user.anonymous}
-							<span class='link admin' on:click={upload(registration, uuid)}>{registration}</span>
+							<button type="button" class='link admin' on:click={upload(registration, uuid)} aria-label="Upload document for {registration}">{registration}</button>
 						{:else}
 							{#if hasDocument}
-								<span class='link' on:click={fetchFile(uuid)}>{registration}</span>
+								<button type="button" class='link' on:click={fetchFile(uuid)} aria-label="View document for {registration}">{registration}</button>
 							{:else}
 								<span class='label'>{registration}</span>
 							{/if}
@@ -207,10 +207,10 @@
 						{#if mtype === type}
 							<tr class='detail'>
 								{#if $user &&  $adminState == 'on' && ! $user.anonymous}
-									<td><span class='equipment link admin' on:click={upload(name, uuid)}>{name}</span></td>
+									<td><button type="button" class='equipment link admin' on:click={upload(name, uuid)} aria-label="Upload document for {name}">{name}</button></td>
 								{:else}
 									{#if hasDocument}
-										<td><span class='equipment link' on:click={fetchFile(uuid)}>{name}</span></td>
+										<td><button type="button" class='equipment link' on:click={fetchFile(uuid)} aria-label="View document for {name}">{name}</button></td>
 									{:else}
 										<td><span class='equipment label'>{name}</span></td>
 									{/if}
@@ -241,8 +241,19 @@
   transform: translate(-50%, -50%);
 }
 #equipment .equipment { text-align: right; float: right; }
-#equipment .admin { }
 #equipment .link { cursor: pointer; }
+#equipment button.link {
+	background: none;
+	border: none;
+	cursor: pointer;
+	color: inherit;
+	padding: 0;
+	font-size: inherit;
+}
+#equipment button.link:focus {
+	outline: 2px solid #005fcc;
+	outline-offset: 2px;
+}
 #equipment .detail { text-align: center; }
 #equipment .detail:hover {background-color: #ddd;}
 #equipment .blank { background-color:rgba(0, 0, 0, 0); }

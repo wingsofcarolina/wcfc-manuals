@@ -82,10 +82,6 @@
 </div>
 
 <style>
-.name {
-  text-align: center;
-  font-weight: bold;
-}
 .dialog {
   position: fixed;
   left: 0;

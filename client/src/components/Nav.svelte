@@ -14,7 +14,9 @@
 
 <div class="banner">
   <div class=branding>
-    <div class=logo on:click={home.bind()}><img src=/WCFC-logo.jpg alt="WCFC Manuals"></div>
+    <button type="button" class=logo on:click={home.bind()} aria-label="Go to home page">
+      <img src=/WCFC-logo.jpg alt="WCFC Manuals">
+    </button>
     <div class=title>WCFC Flight Manuals</div>
   </div>
 	<MediaQuery query="(min-width: 1001px)" let:matches>
@@ -50,6 +52,13 @@
     padding:10px;
     padding-bottom: 0px;
     cursor: pointer;
+    background: none;
+    border: none;
+  }
+
+  .logo:focus {
+    outline: 2px solid #005fcc;
+    outline-offset: 2px;
   }
   .title {
     float:right;

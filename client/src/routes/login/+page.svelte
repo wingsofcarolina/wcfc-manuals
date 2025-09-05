@@ -119,9 +119,6 @@
 	width: 350px;
 	margin: 50px;
 }
-.auth {
-	margin-top: 3em;
-}
 .title {
   font-size: 2em;
   text-align: center;
@@ -164,7 +161,7 @@
   text-align: center;
 }
 
-input, textarea {
+input {
 	font-family: 'Courier', sans-serif;
 	padding: 10px;
 	margin: 10px 0;

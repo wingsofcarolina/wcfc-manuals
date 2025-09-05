@@ -261,17 +261,17 @@
 				{#each aircraft as {registration, uuid, hasDocument } }
 					<th class='reg sticky'>
 						{#if $user &&  $adminState == 'on' && ! $user.anonymous}
-							<span class='link admin' on:click={upload(registration, uuid)}>
+							<button type="button" class='link admin' on:click={upload(registration, uuid)} aria-label="Upload document for {registration}">
 								{registration}
 								{#if hasDocument}
-									<img src='document_white.png' alt='Document'>
+									<img src='document_white.png' alt='' aria-hidden="true">
 								{/if}
-							</span>
+							</button>
 						{:else}
 							{#if hasDocument}
-								<span class='link' on:click={fetchFile(uuid)}>
-									{registration} <img src='document_white.png' alt='Document'>
-								</span>
+								<button type="button" class='link' on:click={fetchFile(uuid)} aria-label="View document for {registration}">
+									{registration} <img src='document_white.png' alt='' aria-hidden="true">
+								</button>
 							{:else}
 								<span class='no_link'>{registration}</span>
 							{/if}
@@ -290,25 +290,26 @@
 									<td>
 										{#if hasDocument}
 											<span class='equipment link admin'>
-												<span on:click={upload(name, uuid)}>
-													{name}<img src='document.png' alt='Document'>
-												</span>
-												<span on:click={deleteEquipment(name, uuid)}>
-													<img src='delete.png' alt='Delete'>
-												</span>
+												<button type="button" on:click={upload(name, uuid)} aria-label="Upload document for {name}">
+													{name}<img src='document.png' alt='' aria-hidden="true">
+												</button>
+												<button type="button" on:click={deleteEquipment(name, uuid)} aria-label="Delete {name}">
+													<img src='delete.png' alt='' aria-hidden="true">
+												</button>
 											</span>
 										{:else}
-											<span class='equipment link admin' on:click={upload(name, uuid)}>
+											<button type="button" class='equipment link admin' on:click={upload(name, uuid)} aria-label="Upload document for {name}">
 												{name}
-											</span>
+											</button>
 										{/if}
 									</td>
 								{:else}
 									{#if hasDocument}
 										<td>
-											<span class='equipment link' on:click={fetchFile(uuid)}>{name}
-												<img src='document.png' alt='Document'>
-											</span>
+											<button type="button" class='equipment link' on:click={fetchFile(uuid)} aria-label="View document for {name}">
+												{name}
+												<img src='document.png' alt='' aria-hidden="true">
+											</button>
 										</td>
 									{:else}
 										<td><span class='equipment'>{name}</span></td>
@@ -372,9 +373,31 @@ a {
 }
 #equipment .newLabel { font-size: 1.3em; color: crimson }
 #equipment .equipment { text-align: right; float: right; }
-#equipment .admin { }
 #equipment .link { cursor: pointer; font-size: 1.0em }
 #equipment .no_link { cursor: pointer; font-size: 1.0em }
+#equipment button.link {
+	background: none;
+	border: none;
+	cursor: pointer;
+	font-size: 1.0em;
+	color: inherit;
+	padding: 0;
+}
+#equipment button.link:focus {
+	outline: 2px solid #005fcc;
+	outline-offset: 2px;
+}
+#equipment .equipment button {
+	background: none;
+	border: none;
+	cursor: pointer;
+	padding: 2px;
+	margin: 0 2px;
+}
+#equipment .equipment button:focus {
+	outline: 2px solid #005fcc;
+	outline-offset: 2px;
+}
 #equipment .label { font-weight: bold; font-size: 1.2em }
 #equipment .detail { text-align: center; }
 #equipment .detail:hover {background-color: #ddd;}
