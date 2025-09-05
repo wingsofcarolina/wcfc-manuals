@@ -242,6 +242,7 @@
                     <include name="**"/>
                   </fileset>
                 </copy>
+                <mkdir dir="root"/>
                 <copy todir="target/classes/assets/root">
                   <fileset dir="root">
                     <include name="*.pdf"/>
