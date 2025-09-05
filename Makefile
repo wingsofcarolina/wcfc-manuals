@@ -15,6 +15,10 @@ format:
 	@echo Formatting Java files...
 	@mvn prettier:write -q
 
+.PHONY: check-format
+check-format:
+	@mvn prettier:check -q
+
 .PHONY: clean
 clean:
 	@rm -rfv target/ docker/ client/build/ client/dist/ client/.sveltekit/
