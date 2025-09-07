@@ -17,7 +17,7 @@
 		}
 		const response = await fetch('/api/member/email/' + email, {
 			method: "get",
-			withCredentials: true,
+			credentials: 'include',
 			headers: {
 				'Accept': 'application/json',
 				'Content-Type': 'application/json'
@@ -36,7 +36,7 @@
 	const verifyUser = async (code) => {
 		const response = await fetch('/api/member/verify/' + code, {
 			method: "get",
-			withCredentials: true,
+			credentials: 'include',
 			headers: {
 				'Accept': 'application/json',
 				'Content-Type': 'application/json'

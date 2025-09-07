@@ -115,6 +115,21 @@ public class MembersResource {
         // User authenticated and identified. Save the info.
         NewCookie cookie = authUtils.generateCookie(user);
         return Response.ok().header("Set-Cookie", AuthUtils.sameSite(cookie)).build();
+      } else {
+        // Fallback: support Admin-only users
+        Admin admin = Admin.getByUUID(vc.getUUID());
+        if (admin != null) {
+          User user = new User(admin.getName(), admin.getEmail());
+          authLog.logUser(user);
+          authCount++;
+
+          // Remove used verification codes
+          vc.delete();
+
+          // User authenticated and identified. Save the info.
+          NewCookie cookie = authUtils.generateCookie(user);
+          return Response.ok().header("Set-Cookie", AuthUtils.sameSite(cookie)).build();
+        }
       }
     } else {
       LOG.info("Verification of code {} failed, not found.", code);
