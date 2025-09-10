@@ -28,6 +28,7 @@ This is a standard SvelteKit application with the following structure:
 ### src/routes
 
 Contains the application pages and API routes:
+
 - Pages are Svelte components in `+page.svelte` files
 - Server-side logic is in `+page.server.js` files
 - API routes are in `+server.js` files
