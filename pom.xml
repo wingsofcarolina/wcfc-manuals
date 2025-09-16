@@ -12,7 +12,7 @@
 		</project.reporting.outputEncoding>
     <maven.compiler.source>21</maven.compiler.source>
     <maven.compiler.target>21</maven.compiler.target>
-    <dropwizard.version>4.0.16</dropwizard.version>
+    <dropwizard.version>5.0.0</dropwizard.version>
     <jackson.version>2.20.0</jackson.version>
     <docker.pull.registry>docker.io</docker.pull.registry>
     <docker.registry>reg.planez.co</docker.registry>
