@@ -9,7 +9,7 @@ client/node_modules: client/package.json client/package-lock.json
 	@cd client && npm install --legacy-peer-deps
 
 .PHONY: format
-format:
+format: client/node_modules
 	@echo Formatting pom.xml files...
 	@find . -name pom.xml -print0 | xargs -0 -I{} bash -c 'xmllint --format --output {} {}'
 	@echo Formatting Java files...
@@ -18,7 +18,7 @@ format:
 	@cd client && npx prettier -w . --log-level silent
 
 .PHONY: check-format
-check-format:
+check-format: client/node_modules
 	@find . -name pom.xml -print0 | xargs -0 -I{} bash -c 'xmllint --format {} | diff -q - {} > /dev/null' || (echo Problem in XML formatting; exit 1)
 	@mvn prettier:check -q || (echo Problem in Java formatting; exit 1)
 	@cd client && npx prettier --check . --log-level silent || (echo Problem in UI formatting; exit 1)
