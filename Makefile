@@ -4,15 +4,25 @@ APP_JAR := target/$(APP_NAME)-$(APP_VERSION).jar
 JAVA_FILES := $(shell find src/main/java/org/wingsofcarolina -name '*.java')
 CONTAINER_TAG := us-central1-docker.pkg.dev/wcfc-apps/wcfc-apps/$(APP_NAME):$(APP_VERSION)
 
+ifneq ($(shell which podman),)
+	CONTAINER_CMD := podman
+else
+ifneq ($(shell which docker),)
+	CONTAINER_CMD := docker
+else
+	CONTAINER_CMD := /bin/false  # force error when used
+endif
+endif
+
 $(APP_JAR): pom.xml client/node_modules $(JAVA_FILES)
-	@mvn
+	@mvn --batch-mode
 
 client/node_modules: client/package.json client/package-lock.json
 	@cd client && npm install --legacy-peer-deps
 	@touch client/node_modules
 
 docker/.build: $(APP_JAR)
-	@cd docker && podman build . -t $(CONTAINER_TAG)
+	@cd docker && $(CONTAINER_CMD) build . -t $(CONTAINER_TAG)
 	@touch docker/.build
 
 .PHONY: build
