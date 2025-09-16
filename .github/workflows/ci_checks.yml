@@ -38,10 +38,10 @@ jobs:
     - name: Check code formatting
       run: make check-format
 
-    - name: Run Maven compile
-      run: mvn compile
-
     - name: Run NPM checks
       run: npm run check
       working-directory: ./client
+
+    - name: Build the app
+      run: make build
 

@@ -1,12 +1,22 @@
+APP_NAME := wcfc-manuals
 APP_VERSION := $(shell mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-APP_JAR := target/wcfc-manuals-$(APP_VERSION).jar
+APP_JAR := target/$(APP_NAME)-$(APP_VERSION).jar
 JAVA_FILES := $(shell find src/main/java/org/wingsofcarolina -name '*.java')
+CONTAINER_TAG := us-central1-docker.pkg.dev/wcfc-apps/wcfc-apps/$(APP_NAME):$(APP_VERSION)
 
 $(APP_JAR): pom.xml client/node_modules $(JAVA_FILES)
 	@mvn
 
 client/node_modules: client/package.json client/package-lock.json
 	@cd client && npm install --legacy-peer-deps
+	@touch client/node_modules
+
+docker/.build: $(APP_JAR)
+	@cd docker && podman build . -t $(CONTAINER_TAG)
+	@touch docker/.build
+
+.PHONY: build
+build: docker/.build
 
 .PHONY: format
 format: client/node_modules
