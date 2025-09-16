@@ -68,7 +68,7 @@
     <br>
     <p>
     <input id="registration" type="text" bind:value={registration}>
-    <p>
+    </p>
     <br>
     <button on:click={cancelUploadDialog.bind()}>Cancel</button>
     <input type="submit" value="Submit" on:click={registerNewAircraft.bind()}>

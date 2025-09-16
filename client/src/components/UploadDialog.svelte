@@ -70,6 +70,7 @@
     <br>
     <input id="file" type="file" bind:files>
     <p>
+    </p>
     <br>
     <button on:click={cancelUploadDialog.bind()}>Cancel</button>
     <input type="submit" value="Submit" on:click={uploadNewHandout.bind()}>

@@ -174,55 +174,58 @@
 
 	{#if equipment && equipmentTypes && aircraft && aircraftTypes}
 		<table id="equipment">
-			<tr>
-				<th class=blank>&nbsp;</th>
-				{#each aircraftTypes as type }
-					<th class='type' colspan={type.count}>
-						<span class='label'>{type.label}</span>
-					</th>
-				{/each}
-			</tr>
-
-			<tr>
-				<th>Equipment</th>
-				{#each aircraft as {registration, uuid, hasDocument } }
-					<th class=reg>
-						{#if $user &&  $adminState == 'on' && ! $user.anonymous}
-							<button type="button" class='link admin' on:click={upload(registration, uuid)} aria-label="Upload document for {registration}">{registration}</button>
-						{:else}
-							{#if hasDocument}
-								<button type="button" class='link' on:click={fetchFile(uuid)} aria-label="View document for {registration}">{registration}</button>
-							{:else}
-								<span class='label'>{registration}</span>
-							{/if}
-						{/if}
-					</th>
-				{/each}
-			</tr>
-
-			{#key aircraft}
-				{#each equipmentTypes as {mtype, label} }
-					<tr class='label'><td><span class='label'>{label}</span></td></tr>
-					{#each equipment as { name, type, uuid, hasDocument } }
-						{#if mtype === type}
-							<tr class='detail'>
-								{#if $user &&  $adminState == 'on' && ! $user.anonymous}
-									<td><button type="button" class='equipment link admin' on:click={upload(name, uuid)} aria-label="Upload document for {name}">{name}</button></td>
-								{:else}
-									{#if hasDocument}
-										<td><button type="button" class='equipment link' on:click={fetchFile(uuid)} aria-label="View document for {name}">{name}</button></td>
-									{:else}
-										<td><span class='equipment label'>{name}</span></td>
-									{/if}
-								{/if}
-								{#each aircraft as acft }
-									<Checkmark uuid={uuid} aircraft={acft} on:message={refresh}/>
-								{/each}
-							</tr>
-						{/if}
+			<thead>
+				<tr>
+					<th class=blank>&nbsp;</th>
+					{#each aircraftTypes as type }
+						<th class='type' colspan={type.count}>
+							<span class='label'>{type.label}</span>
+						</th>
 					{/each}
-				{/each}
-			{/key}
+				</tr>
+
+				<tr>
+					<th>Equipment</th>
+					{#each aircraft as {registration, uuid, hasDocument } }
+						<th class=reg>
+							{#if $user &&  $adminState == 'on' && ! $user.anonymous}
+								<button type="button" class='link admin' on:click={upload(registration, uuid)} aria-label="Upload document for {registration}">{registration}</button>
+							{:else}
+								{#if hasDocument}
+									<button type="button" class='link' on:click={fetchFile(uuid)} aria-label="View document for {registration}">{registration}</button>
+								{:else}
+									<span class='label'>{registration}</span>
+								{/if}
+							{/if}
+						</th>
+					{/each}
+				</tr>
+			</thead>
+			<tbody>
+				{#key aircraft}
+					{#each equipmentTypes as {mtype, label} }
+						<tr class='label'><td><span class='label'>{label}</span></td></tr>
+						{#each equipment as { name, type, uuid, hasDocument } }
+							{#if mtype === type}
+								<tr class='detail'>
+									{#if $user &&  $adminState == 'on' && ! $user.anonymous}
+										<td><button type="button" class='equipment link admin' on:click={upload(name, uuid)} aria-label="Upload document for {name}">{name}</button></td>
+									{:else}
+										{#if hasDocument}
+											<td><button type="button" class='equipment link' on:click={fetchFile(uuid)} aria-label="View document for {name}">{name}</button></td>
+										{:else}
+											<td><span class='equipment label'>{name}</span></td>
+										{/if}
+									{/if}
+									{#each aircraft as acft }
+										<Checkmark uuid={uuid} aircraft={acft} on:message={refresh}/>
+									{/each}
+								</tr>
+							{/if}
+						{/each}
+					{/each}
+				{/key}
+			</tbody>
 		</table>
 	{/if}
 

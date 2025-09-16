@@ -74,7 +74,7 @@
     <br>
     <p>
     <input id="name" type="text" bind:value={name}>
-    <p>
+    </p>
     <br>
     <button on:click={cancelUploadDialog.bind()}>Cancel</button>
     <input type="submit" value="Submit" on:click={registerNewEquipment.bind()}>

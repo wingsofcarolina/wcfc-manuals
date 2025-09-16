@@ -94,7 +94,7 @@
 			{/if}
 		{:else}
 			<span>
-				<span class="no-arrow"/>
+				<span class="no-arrow"></span>
 				{#if link}
 					<span class='label'>{label}</span>
 					<button type="button" class="document-button" on:click={() => fetchFile(link)} aria-label="Open document {label}">
