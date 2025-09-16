@@ -21,6 +21,22 @@
     <dockerImage>${dockerRegistry}/${project.artifactId}:${project.version}
 		</dockerImage>
     <containerName>wcfc-manuals</containerName>
+    <!-- Default git properties (will be overridden by git-commit-id-plugin) -->
+    <git.commit.id>unknown</git.commit.id>
+    <git.tags>unknown</git.tags>
+    <git.branch>unknown</git.branch>
+    <git.dirty>unknown</git.dirty>
+    <git.build.time>unknown</git.build.time>
+    <git.build.host>unknown</git.build.host>
+    <git.build.version>unknown</git.build.version>
+    <git.commit.time>unknown</git.commit.time>
+    <git.remote.origin.url>unknown</git.remote.origin.url>
+    <git.commit.id.abbrev>unknown</git.commit.id.abbrev>
+    <git.commit.id.describe-short>unknown</git.commit.id.describe-short>
+    <git.commit.user.name>unknown</git.commit.user.name>
+    <git.commit.user.email>unknown</git.commit.user.email>
+    <git.build.user.name>unknown</git.build.user.name>
+    <git.build.user.email>unknown</git.build.user.email>
   </properties>
   <dependencies>
     <dependency>
