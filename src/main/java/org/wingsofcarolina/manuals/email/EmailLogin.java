@@ -1,20 +1,12 @@
 package org.wingsofcarolina.manuals.email;
 
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.simpleemail.AmazonSimpleEmailService;
-import com.amazonaws.services.simpleemail.AmazonSimpleEmailServiceClientBuilder;
-import com.amazonaws.services.simpleemail.model.Body;
-import com.amazonaws.services.simpleemail.model.Content;
-import com.amazonaws.services.simpleemail.model.Destination;
-import com.amazonaws.services.simpleemail.model.Message;
-import com.amazonaws.services.simpleemail.model.SendEmailRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wingsofcarolina.manuals.domain.VerificationCode;
 
 public class EmailLogin {
 
-  // This address must be verified with Amazon SES.
+  // This address must be configured with Gmail API access
   static final String FROM = "webmaster@wingsofcarolina.org";
 
   // This is the server to which we need to direct the verification
@@ -22,6 +14,9 @@ public class EmailLogin {
 
   // The subject line for the email.
   static final String SUBJECT = "WCFC Manuals Login";
+
+  // Gmail service instance
+  private static GmailService gmailService;
 
   // The HTML body for the email.
   static final String HTMLBODY =
@@ -59,12 +54,32 @@ public class EmailLogin {
 
   private static final Logger LOG = LoggerFactory.getLogger(EmailLogin.class);
 
+  /**
+   * Initialize the email service with server information and Gmail credentials from environment.
+   *
+   * @param server The server URL for email templates
+   */
   public static void initialize(String server) {
     EmailLogin.SERVER = server;
+
+    // Get Gmail service account JSON from environment variable
+    String credentialsJson = System.getenv("GMAIL_SERVICE_ACCOUNT_JSON");
+    if (credentialsJson == null || credentialsJson.trim().isEmpty()) {
+      LOG.error("GMAIL_SERVICE_ACCOUNT_JSON environment variable not set");
+      throw new RuntimeException("Gmail service account JSON not configured");
+    }
+
+    try {
+      gmailService = new GmailService(credentialsJson, FROM);
+      LOG.info("Email service initialized successfully with Gmail API");
+    } catch (Exception e) {
+      LOG.error("Failed to initialize Gmail service: {}", e.getMessage(), e);
+      throw new RuntimeException("Gmail service initialization failed", e);
+    }
   }
 
   public void emailTo(String email, String uuid) {
-    if (SERVER != null) {
+    if (SERVER != null && gmailService != null) {
       Integer code = VerificationCode.makeEntry(uuid).getCode();
 
       String htmlBody = HTMLBODY
@@ -79,29 +94,20 @@ public class EmailLogin {
         .replace("CODE", code.toString());
 
       try {
-        AmazonSimpleEmailService client = AmazonSimpleEmailServiceClientBuilder
-          .standard()
-          // Replace US_WEST_2 with the AWS Region you're using for
-          // Amazon SES.
-          .withRegion(Regions.US_EAST_1)
-          .build();
-        SendEmailRequest request = new SendEmailRequest()
-          .withDestination(new Destination().withToAddresses(email))
-          .withMessage(
-            new Message()
-              .withBody(
-                new Body()
-                  .withHtml(new Content().withCharset("UTF-8").withData(htmlBody))
-                  .withText(new Content().withCharset("UTF-8").withData(textBody))
-              )
-              .withSubject(new Content().withCharset("UTF-8").withData(SUBJECT))
-          )
-          .withSource(FROM);
-        client.sendEmail(request);
-        LOG.info("Email sent to {} with id {} and code {}", email, uuid, code);
-      } catch (Exception ex) {
-        LOG.info("The email was not sent. Error message: {}", ex.getMessage());
+        gmailService.sendEmail(email, SUBJECT, textBody, htmlBody);
+        LOG.info(
+          "Verification email sent successfully to {} with id {} and code {}",
+          email,
+          uuid,
+          code
+        );
+      } catch (Exception e) {
+        LOG.error("Failed to send email to {}: {}", email, e.getMessage(), e);
+        throw new RuntimeException("Failed to send verification email", e);
       }
+    } else {
+      LOG.error("Cannot send email: SERVER or gmailService not initialized");
+      throw new IllegalStateException("Email service not properly initialized");
     }
   }
 }

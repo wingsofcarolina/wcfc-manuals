@@ -150,19 +150,31 @@
       <version>3.2.3</version>
     </dependency>
     <!--
-		     Amazon AWS support libraries included below, mostly for SES access
-		     https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-core
+		     Gmail API support libraries for email sending
+		     https://mvnrepository.com/artifact/com.google.apis/google-api-services-gmail
 		-->
     <dependency>
-      <groupId>com.amazonaws</groupId>
-      <artifactId>aws-java-sdk-core</artifactId>
-      <version>1.12.791</version>
+      <groupId>com.google.apis</groupId>
+      <artifactId>google-api-services-gmail</artifactId>
+      <version>v1-rev20250630-2.0.0</version>
     </dependency>
-    <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-ses -->
+    <!-- https://mvnrepository.com/artifact/com.google.auth/google-auth-library-oauth2-http -->
     <dependency>
-      <groupId>com.amazonaws</groupId>
-      <artifactId>aws-java-sdk-ses</artifactId>
-      <version>1.12.791</version>
+      <groupId>com.google.auth</groupId>
+      <artifactId>google-auth-library-oauth2-http</artifactId>
+      <version>1.20.0</version>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/com.google.api-client/google-api-client -->
+    <dependency>
+      <groupId>com.google.api-client</groupId>
+      <artifactId>google-api-client</artifactId>
+      <version>2.2.0</version>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/javax.mail/javax.mail-api -->
+    <dependency>
+      <groupId>com.sun.mail</groupId>
+      <artifactId>javax.mail</artifactId>
+      <version>1.6.2</version>
     </dependency>
     <!-- https://mvnrepository.com/artifact/org.jsoup/jsoup -->
     <dependency>
