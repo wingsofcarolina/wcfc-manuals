@@ -12,7 +12,7 @@ import jakarta.servlet.FilterRegistration;
 import java.text.SimpleDateFormat;
 import java.util.EnumSet;
 import java.util.TimeZone;
-import org.eclipse.jetty.servlets.CrossOriginFilter;
+import org.eclipse.jetty.ee10.servlets.CrossOriginFilter;
 import org.knowm.dropwizard.sundial.SundialBundle;
 import org.knowm.dropwizard.sundial.SundialConfiguration;
 import org.slf4j.Logger;
@@ -115,21 +115,13 @@ public class ManualsService extends Application<ManualsConfiguration> {
       .addFilter("CORS", CrossOriginFilter.class);
 
     // Configure CORS parameters
-    cors.setInitParameter(CrossOriginFilter.ALLOWED_ORIGINS_PARAM, "*");
+    cors.setInitParameter("allowedOrigins", "*");
     cors.setInitParameter(
-      CrossOriginFilter.ALLOWED_HEADERS_PARAM,
+      "allowedHeaders",
       "X-Requested-With,Content-Type,Accept,Origin,Authorization"
     );
-    cors.setInitParameter(
-      CrossOriginFilter.ALLOWED_METHODS_PARAM,
-      "OPTIONS,GET,PUT,POST,DELETE,HEAD"
-    );
-    cors.setInitParameter(CrossOriginFilter.ALLOW_CREDENTIALS_PARAM, "true");
-    cors.setInitParameter(
-      CrossOriginFilter.ACCESS_CONTROL_ALLOW_CREDENTIALS_HEADER,
-      "true"
-    );
-    cors.setInitParameter(CrossOriginFilter.ACCESS_CONTROL_ALLOW_ORIGIN_HEADER, "/");
+    cors.setInitParameter("allowedMethods", "OPTIONS,GET,PUT,POST,DELETE,HEAD");
+    cors.setInitParameter("allowCredentials", "true");
 
     // Add URL mapping
     cors.addMappingForUrlPatterns(EnumSet.allOf(DispatcherType.class), true, "/*");
