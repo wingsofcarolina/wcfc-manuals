@@ -1,6 +1,6 @@
 <script>
 	import { goto } from '$app/navigation';
-  import NotificationDisplay from '@beyonk/svelte-notifications/src/Notifications.svelte'
+  import { NotificationDisplay } from '@beyonk/svelte-notifications'
   import { user, adminState } from '../store.js'
   import Switch from '../components/Switch.svelte'
 	import MediaQuery from "../components/MediaQuery.svelte";

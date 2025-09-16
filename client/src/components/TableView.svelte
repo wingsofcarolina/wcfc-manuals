@@ -4,7 +4,7 @@
 	import { user, adminState } from '../store.js'
 	import { getUser } from '../common.js'
 	import { Circle2 } from 'svelte-loading-spinners'
-	import * as notifier from '@beyonk/svelte-notifications/src/notifier.js'
+	import { notifier } from '@beyonk/svelte-notifications'
 	import Checkmark from "../components/Checkmark.svelte";
 	import UploadDialog from "../components/UploadDialog.svelte";
 	import NewEquipmentDialog from "../components/NewEquipmentDialog.svelte";

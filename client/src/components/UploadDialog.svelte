@@ -1,5 +1,5 @@
 <script>
-  import * as notifier from '@beyonk/svelte-notifications/src/notifier.js'
+  import { notifier } from '@beyonk/svelte-notifications'
   import { createEventDispatcher } from 'svelte';
   import { Circle2 } from 'svelte-loading-spinners'
 
