@@ -12,8 +12,8 @@
 		</project.reporting.outputEncoding>
     <maven.compiler.source>21</maven.compiler.source>
     <maven.compiler.target>21</maven.compiler.target>
-    <dropwizard.version>4.0.8</dropwizard.version>
-    <jackson.version>2.17.2</jackson.version>
+    <dropwizard.version>4.0.16</dropwizard.version>
+    <jackson.version>2.20.0</jackson.version>
     <docker.pull.registry>docker.io</docker.pull.registry>
     <docker.registry>reg.planez.co</docker.registry>
     <dockerRegistry>${docker.registry}</dockerRegistry>
@@ -88,7 +88,7 @@
     <dependency>
       <groupId>org.mongodb</groupId>
       <artifactId>mongodb-driver-sync</artifactId>
-      <version>5.6.0-alpha0</version>
+      <version>5.6.0</version>
     </dependency>
     <dependency>
       <groupId>com.dropbox.core</groupId>
@@ -131,7 +131,7 @@
     <dependency>
       <groupId>org.apache.tika</groupId>
       <artifactId>tika-core</artifactId>
-      <version>3.2.2</version>
+      <version>3.2.3</version>
     </dependency>
     <!--
 		     Amazon AWS support libraries included below, mostly for SES access
@@ -140,13 +140,13 @@
     <dependency>
       <groupId>com.amazonaws</groupId>
       <artifactId>aws-java-sdk-core</artifactId>
-      <version>1.12.789</version>
+      <version>1.12.791</version>
     </dependency>
     <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-ses -->
     <dependency>
       <groupId>com.amazonaws</groupId>
       <artifactId>aws-java-sdk-ses</artifactId>
-      <version>1.12.789</version>
+      <version>1.12.791</version>
     </dependency>
     <!-- https://mvnrepository.com/artifact/org.jsoup/jsoup -->
     <dependency>
@@ -162,12 +162,12 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-install-plugin</artifactId>
-          <version>3.1.2</version>
+          <version>3.1.4</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
-          <version>3.3.1</version>
+          <version>3.5.4</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -177,12 +177,12 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-enforcer-plugin</artifactId>
-          <version>3.5.0</version>
+          <version>3.6.1</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.13.0</version>
+          <version>3.14.0</version>
           <configuration>
             <source>21</source>
             <target>21</target>
@@ -206,17 +206,17 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-shade-plugin</artifactId>
-          <version>3.6.0</version>
+          <version>3.6.1</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-deploy-plugin</artifactId>
-          <version>2.8.2</version>
+          <version>3.1.4</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-site-plugin</artifactId>
-          <version>3.4</version>
+          <version>3.21.0</version>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -256,7 +256,7 @@
       <plugin>
         <groupId>pl.project13.maven</groupId>
         <artifactId>git-commit-id-plugin</artifactId>
-        <version>2.2.4</version>
+        <version>4.9.10</version>
         <executions>
           <execution>
             <id>get-the-git-infos</id>
@@ -322,7 +322,7 @@
       </plugin>
       <plugin>
         <artifactId>maven-clean-plugin</artifactId>
-        <version>3.0.0</version>
+        <version>3.5.0</version>
         <configuration>
           <filesets>
             <fileset>
@@ -421,7 +421,7 @@
       <plugin>
         <groupId>com.coderplus.maven.plugins</groupId>
         <artifactId>copy-rename-maven-plugin</artifactId>
-        <version>1.0</version>
+        <version>1.0.1</version>
         <executions>
           <execution>
             <id>rename-file</id>
@@ -491,7 +491,7 @@
       <plugin>
         <groupId>io.fabric8</groupId>
         <artifactId>docker-maven-plugin</artifactId>
-        <version>0.28.0</version>
+        <version>0.46.0</version>
         <extensions>true</extensions>
         <configuration>
           <verbose>true</verbose>
