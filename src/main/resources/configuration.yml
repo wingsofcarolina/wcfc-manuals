@@ -20,8 +20,11 @@ auth: ${AUTH:-ON}
 mockUser: ${MOCKUSER:-none}
 
 # Slack channels
-slackNotify: ${SLACK:-T0H7FTUQK/B02LP23EURJ/d9iiJxMCsr03OBWgYsP4cf9E}     # Targets #notification
-slackManuals: ${SLACK:-T0H7FTUQK/B049U4ZG7TL/ct0vai5hEa4a4oA8GJAq97ep}    # Targets #manuals
+slackNotify: ${SLACK_TOKEN_NOTIFICATIONS:-none}     # Targets #notification
+slackManuals: ${SLACK_TOKEN_MANUALS:-none}    # Targets #manuals
+
+# SMTP configuration
+smtpHost: ${SMTP_HOST:-smtp-relay.gmail.com}
 
 # Configure the Sundial job management system    
 sundial:

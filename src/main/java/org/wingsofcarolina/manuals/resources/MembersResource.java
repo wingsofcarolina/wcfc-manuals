@@ -45,7 +45,7 @@ import org.wingsofcarolina.manuals.model.User;
 public class MembersResource {
 
   private static final Logger LOG = LoggerFactory.getLogger(MembersResource.class);
-  private static final String WCFC_TOKEN = "adfasd58df57a8adf68dsafd";
+  private static final String WCFC_TOKEN = System.getenv("WCFC_TOKEN");
 
   @SuppressWarnings("unused")
   private static ManualsConfiguration config;

@@ -58,12 +58,13 @@ public class EmailLogin {
    * Initialize the email service with server information using SMTP.
    *
    * @param server The server URL for email templates
+   * @param smtpHost The SMTP host to connect to
    */
-  public static void initialize(String server) {
+  public static void initialize(String server, String smtpHost) {
     EmailLogin.SERVER = server;
 
     try {
-      smtpService = new SmtpService(FROM);
+      smtpService = new SmtpService(FROM, smtpHost);
       LOG.info("Email service initialized successfully with SMTP");
     } catch (Exception e) {
       LOG.error("Failed to initialize SMTP service: {}", e.getMessage(), e);

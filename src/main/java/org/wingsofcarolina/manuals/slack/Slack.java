@@ -30,7 +30,11 @@ public class Slack {
 
   public Slack(ManualsConfiguration config) {
     // Build webhook URLs from the configuration
-    if (config.getSlackNotify() != null && !config.getSlackNotify().isEmpty()) {
+    if (
+      config.getSlackNotify() != null &&
+      !config.getSlackNotify().isEmpty() &&
+      !"none".equals(config.getSlackNotify())
+    ) {
       if (config.getSlackNotify().startsWith("https://")) {
         notificationUrl = config.getSlackNotify();
       } else {
@@ -49,10 +53,17 @@ public class Slack {
         }
       }
     } else {
-      throw new RuntimeException("Slack notification URL not configured!");
+      LOG.warn(
+        "Slack notification channel is disabled (token set to 'none' or not configured)"
+      );
+      notificationUrl = null;
     }
 
-    if (config.getSlackManuals() != null && !config.getSlackManuals().isEmpty()) {
+    if (
+      config.getSlackManuals() != null &&
+      !config.getSlackManuals().isEmpty() &&
+      !"none".equals(config.getSlackManuals())
+    ) {
       if (config.getSlackManuals().startsWith("https://")) {
         manualsUrl = config.getSlackManuals();
       } else {
@@ -71,7 +82,10 @@ public class Slack {
         }
       }
     } else {
-      throw new RuntimeException("Slack manuals URL not configured!");
+      LOG.warn(
+        "Slack manuals channel is disabled (token set to 'none' or not configured)"
+      );
+      manualsUrl = null;
     }
 
     Slack.instance = this;
@@ -89,7 +103,7 @@ public class Slack {
 
   public void sendString(Channel channel, String msg) {
     if (msg != null) {
-      LOG.debug("{}", msg);
+      LOG.info("{}", msg);
       if (config.getMode().equals("PROD")) {
         sendMessage(channel, msg);
       }
@@ -101,6 +115,10 @@ public class Slack {
       LOG.info("Sending : {}", msg);
       if (config.getMode().equals("PROD")) {
         String url = getWebhookUrl(channel);
+        if (url == null) {
+          LOG.info("Slack channel {} is disabled, skipping message: {}", channel, msg);
+          return false;
+        }
         CloseableHttpClient httpclient = HttpClients.createDefault();
         HttpPost httpPost = new HttpPost(url);
         String json = "{\"text\":\"MANUALS: " + escapeJson(msg) + "\"}";

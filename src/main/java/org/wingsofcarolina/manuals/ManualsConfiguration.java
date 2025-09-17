@@ -34,6 +34,9 @@ public class ManualsConfiguration extends Configuration {
   @JsonProperty
   String manualsServer;
 
+  @JsonProperty
+  String smtpHost;
+
   @Valid
   @NotNull
   public SundialConfiguration sundialConfiguration = new SundialConfiguration();
@@ -76,6 +79,10 @@ public class ManualsConfiguration extends Configuration {
 
   public String getManualsServer() {
     return manualsServer;
+  }
+
+  public String getSmtpHost() {
+    return smtpHost;
   }
 
   public String getGs() {

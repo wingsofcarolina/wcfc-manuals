@@ -96,7 +96,7 @@ public class ManualsService extends Application<ManualsConfiguration> {
     new Persistence().initialize(config.getMongodb());
 
     // Make sure the email class knows the right server to reference
-    EmailLogin.initialize(config.getManualsServer());
+    EmailLogin.initialize(config.getManualsServer(), config.getSmtpHost());
 
     // Set exception mappers
     if (config.getMode().contentEquals("PROD")) {

@@ -13,26 +13,32 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * SMTP service for sending emails via smtp-relay.gmail.com with TLS but no authentication.
+ * SMTP service for sending emails with TLS but no authentication.
  */
 public class SmtpService {
 
-  private static final String SMTP_HOST = "smtp-relay.gmail.com";
   private static final int SMTP_PORT = 587;
   private static final Logger LOG = LoggerFactory.getLogger(SmtpService.class);
 
   private Session session;
   private String fromAddress;
+  private String smtpHost;
 
   /**
    * Initialize SMTP service with TLS enabled but no authentication.
    *
    * @param fromAddress The email address to send from
+   * @param smtpHost The SMTP host to connect to
    */
-  public SmtpService(String fromAddress) {
+  public SmtpService(String fromAddress, String smtpHost) {
     this.fromAddress = fromAddress;
+    this.smtpHost = smtpHost;
     this.session = createSmtpSession();
-    LOG.info("SMTP service initialized successfully for sender: {}", fromAddress);
+    LOG.info(
+      "SMTP service initialized successfully for sender: {} using host: {}",
+      fromAddress,
+      smtpHost
+    );
   }
 
   /**
@@ -42,7 +48,7 @@ public class SmtpService {
     Properties props = new Properties();
 
     // SMTP server configuration
-    props.put("mail.smtp.host", SMTP_HOST);
+    props.put("mail.smtp.host", smtpHost);
     props.put("mail.smtp.port", SMTP_PORT);
 
     // Enable TLS
