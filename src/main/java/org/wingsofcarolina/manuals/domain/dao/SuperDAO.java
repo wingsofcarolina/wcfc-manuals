@@ -58,7 +58,26 @@ public class SuperDAO {
   }
 
   public void save(Object user) {
-    ds.save(user);
+    try {
+      ds.save(user);
+    } catch (Exception e) {
+      // Log the error and try to ensure collection exists, then retry
+      LOG.warn(
+        "Error saving object, attempting to ensure collection exists: {}",
+        e.getMessage()
+      );
+      try {
+        // Try to ensure the collection exists and retry the save
+        ensureCollectionExistsForClass(user.getClass());
+        ds.save(user);
+      } catch (Exception retryException) {
+        LOG.error(
+          "Failed to save object even after ensuring collection exists",
+          retryException
+        );
+        throw retryException;
+      }
+    }
   }
 
   public void delete(Object user) {
@@ -79,5 +98,51 @@ public class SuperDAO {
       }
     }
     return (String) value;
+  }
+
+  /**
+   * Ensure the collection exists for the given class, creating it if it doesn't
+   */
+  private void ensureCollectionExistsForClass(Class<?> clazz) {
+    try {
+      String collectionName = collectionName(clazz);
+      if (collectionName != null) {
+        ensureCollectionExists(collectionName);
+      }
+    } catch (Exception e) {
+      LOG.debug(
+        "Could not determine collection name for class {}: {}",
+        clazz.getSimpleName(),
+        e.getMessage()
+      );
+    }
+  }
+
+  /**
+   * Ensure the collection exists, creating it if it doesn't
+   */
+  private void ensureCollectionExists(String collectionName) {
+    try {
+      // Check if collection exists by listing collections
+      boolean collectionExists = false;
+      for (String name : ds.getDatabase().listCollectionNames()) {
+        if (name.equals(collectionName)) {
+          collectionExists = true;
+          break;
+        }
+      }
+
+      // Create collection if it doesn't exist
+      if (!collectionExists) {
+        LOG.info("Creating MongoDB collection: {}", collectionName);
+        ds.getDatabase().createCollection(collectionName);
+      }
+    } catch (Exception e) {
+      // Log but don't fail - the collection might exist or be created automatically
+      LOG.debug(
+        "Could not ensure collection exists (this is usually fine): {}",
+        e.getMessage()
+      );
+    }
   }
 }

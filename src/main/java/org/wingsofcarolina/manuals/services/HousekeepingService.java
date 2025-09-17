@@ -63,14 +63,22 @@ public class HousekeepingService {
         VerificationCode.cleanCache();
 
         // Update the last run time
-        tracker.updateLastRun();
-
-        LOG.info("Housekeeping completed successfully");
+        try {
+          tracker.updateLastRun();
+          LOG.info("Housekeeping completed successfully");
+        } catch (Exception saveException) {
+          LOG.error(
+            "Housekeeping tasks completed but failed to update tracker",
+            saveException
+          );
+          // Don't rethrow - the housekeeping tasks were successful
+        }
       } else {
         LOG.debug("Housekeeping not needed, skipping");
       }
     } catch (Exception e) {
       LOG.error("Error during housekeeping execution", e);
+      // Continue running - don't let housekeeping failures break the service
     }
   }
 

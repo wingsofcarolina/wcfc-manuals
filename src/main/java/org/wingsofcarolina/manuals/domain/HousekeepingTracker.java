@@ -34,12 +34,30 @@ public class HousekeepingTracker {
    * Get the singleton housekeeping tracker record
    */
   public static HousekeepingTracker getInstance() {
-    HousekeepingTracker tracker = dao.getByTrackerId(SINGLETON_ID);
-    if (tracker == null) {
-      tracker = new HousekeepingTracker(SINGLETON_ID);
-      tracker.save();
+    try {
+      HousekeepingTracker tracker = dao.getByTrackerId(SINGLETON_ID);
+      if (tracker == null) {
+        LOG.info("Creating new HousekeepingTracker instance");
+        tracker = new HousekeepingTracker(SINGLETON_ID);
+        try {
+          tracker.save();
+        } catch (Exception saveException) {
+          LOG.warn(
+            "Failed to save new HousekeepingTracker, will continue with in-memory instance: {}",
+            saveException.getMessage()
+          );
+          // Continue with the in-memory tracker - it will still work for this session
+        }
+      }
+      return tracker;
+    } catch (Exception e) {
+      LOG.warn(
+        "Error retrieving HousekeepingTracker from database, creating temporary instance: {}",
+        e.getMessage()
+      );
+      // Return a temporary tracker that will work for this session
+      return new HousekeepingTracker(SINGLETON_ID);
     }
-    return tracker;
   }
 
   /**
