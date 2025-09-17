@@ -28,6 +28,10 @@ docker/.build: $(APP_JAR)
 .PHONY: build
 build: docker/.build
 
+.PHONY: push
+push: docker/.build
+	@podman push $(CONTAINER_TAG)
+
 .PHONY: format
 format: client/node_modules
 	@echo Formatting pom.xml files...
