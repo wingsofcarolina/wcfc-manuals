@@ -21,6 +21,7 @@ import org.wingsofcarolina.manuals.healthcheck.MinimalHealthCheck;
 import org.wingsofcarolina.manuals.persistence.Persistence;
 import org.wingsofcarolina.manuals.resources.ManualsResource;
 import org.wingsofcarolina.manuals.resources.MembersResource;
+import org.wingsofcarolina.manuals.resources.SpaFallbackResource;
 import org.wingsofcarolina.manuals.slack.Slack;
 
 public class ManualsService extends Application<ManualsConfiguration> {
@@ -98,6 +99,9 @@ public class ManualsService extends Application<ManualsConfiguration> {
     if (config.getMode().contentEquals("PROD")) {
       env.jersey().register(new RuntimeExceptionMapper());
     }
+
+    // Register SPA fallback resource for client-side routing
+    env.jersey().register(new SpaFallbackResource());
 
     // Now set up the API
     env.jersey().register(new ManualsResource(config));
