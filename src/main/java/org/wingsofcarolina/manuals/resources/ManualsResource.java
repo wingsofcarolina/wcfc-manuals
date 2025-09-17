@@ -98,9 +98,6 @@ public class ManualsResource {
   private DateTimeFormatter dateFormatGmt;
   private DateTimeFormatter dateFormatArchive;
 
-  // Slack credentials
-  private static final String CLIENT_ID = "REDACTED";
-  private static final String CLIENT_SECRET = "REDACTED";
   private SlackAuthService slackAuth;
 
   private AuthUtils authUtils;
@@ -155,7 +152,8 @@ public class ManualsResource {
     dateFormatArchive = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     // Create Slack authentication API service object
-    slackAuth = new SlackAuthService(CLIENT_ID, CLIENT_SECRET);
+    slackAuth =
+      new SlackAuthService(config.getSlackClientId(), config.getSlackClientSecret());
 
     // Load data store (from JSON files, simplistic!)
     loadDataStore();

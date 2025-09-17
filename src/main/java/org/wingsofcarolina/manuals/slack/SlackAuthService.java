@@ -55,7 +55,7 @@ public class SlackAuthService {
    *   "authed_user": {
    *     "id": "REDACTED",
    *     "scope": "identity.basic",
-   *     "access_token": "REDACTED",
+   *     "access_token": "[token]",
    *     "token_type": "user"
    *   },
    *   "team": {
