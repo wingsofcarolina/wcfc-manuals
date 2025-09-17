@@ -1,5 +1,8 @@
 package org.wingsofcarolina.manuals.persistence;
 
+import com.mongodb.ConnectionString;
+import com.mongodb.MongoClientSettings;
+import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.FindOneAndUpdateOptions;
@@ -25,13 +28,44 @@ public class Persistence {
   public Persistence initialize(String mongodb) {
     if (instance == null) {
       LOG.info("Connecting to MongoDB with '{}'", mongodb);
-      datastore = Morphia.createDatastore(MongoClients.create(mongodb), "manuals");
 
-      // Entity classes will be mapped automatically when first used in Morphia 2.5+
-      // No need for explicit mapping calls
+      try {
+        // Create MongoDB client with connection options suitable for cloud deployments
+        com.mongodb.MongoClientSettings.Builder settingsBuilder = com.mongodb.MongoClientSettings
+          .builder()
+          .applyConnectionString(new com.mongodb.ConnectionString(mongodb))
+          .applyToConnectionPoolSettings(builder ->
+            builder
+              .maxConnectionIdleTime(60, java.util.concurrent.TimeUnit.SECONDS)
+              .maxConnectionLifeTime(120, java.util.concurrent.TimeUnit.SECONDS)
+              .minSize(1)
+              .maxSize(10)
+          )
+          .applyToSocketSettings(builder ->
+            builder
+              .connectTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
+              .readTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+          );
 
-      // Make this a singleton
-      instance = this;
+        com.mongodb.client.MongoClient mongoClient = MongoClients.create(
+          settingsBuilder.build()
+        );
+
+        // Test the connection
+        mongoClient.getDatabase("manuals").runCommand(new org.bson.Document("ping", 1));
+        LOG.info("Successfully connected to MongoDB");
+
+        datastore = Morphia.createDatastore(mongoClient, "manuals");
+
+        // Entity classes will be mapped automatically when first used in Morphia 2.5+
+        // No need for explicit mapping calls
+
+        // Make this a singleton
+        instance = this;
+      } catch (Exception e) {
+        LOG.error("Failed to connect to MongoDB: {}", e.getMessage(), e);
+        throw new RuntimeException("MongoDB connection failed", e);
+      }
     }
     return this;
   }
