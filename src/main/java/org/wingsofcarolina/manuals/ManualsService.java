@@ -21,7 +21,6 @@ import org.wingsofcarolina.manuals.healthcheck.MinimalHealthCheck;
 import org.wingsofcarolina.manuals.persistence.Persistence;
 import org.wingsofcarolina.manuals.resources.ManualsResource;
 import org.wingsofcarolina.manuals.resources.MembersResource;
-import org.wingsofcarolina.manuals.resources.SpaFallbackResource;
 import org.wingsofcarolina.manuals.slack.Slack;
 
 public class ManualsService extends Application<ManualsConfiguration> {
@@ -48,7 +47,20 @@ public class ManualsService extends Application<ManualsConfiguration> {
     );
 
     // bootstrap.addBundle(new AssetsBundle("/doc", "/doc", "index.html","html"));
-    bootstrap.addBundle(new AssetsBundle("/assets/", "/", "index.html"));
+    bootstrap.addBundle(new AssetsBundle("/assets/", "/", "index.html", "assets"));
+
+    // Add SPA fallback routes - serve index.html for client-side routes
+    bootstrap.addBundle(
+      new AssetsBundle("/assets/", "/equipment", "index.html", "equipment")
+    );
+    bootstrap.addBundle(
+      new AssetsBundle("/assets/", "/contact", "index.html", "contact")
+    );
+    bootstrap.addBundle(new AssetsBundle("/assets/", "/about", "index.html", "about"));
+    bootstrap.addBundle(new AssetsBundle("/assets/", "/login", "index.html", "login"));
+    bootstrap.addBundle(new AssetsBundle("/assets/", "/manage", "index.html", "manage"));
+    bootstrap.addBundle(new AssetsBundle("/assets/", "/view", "index.html", "view"));
+
     bootstrap.addBundle(new MultiPartBundle());
   }
 
@@ -91,9 +103,6 @@ public class ManualsService extends Application<ManualsConfiguration> {
     if (config.getMode().contentEquals("PROD")) {
       env.jersey().register(new RuntimeExceptionMapper());
     }
-
-    // Register SPA fallback resource for client-side routing
-    env.jersey().register(new SpaFallbackResource());
 
     // Now set up the API
     env.jersey().register(new ManualsResource(config));
