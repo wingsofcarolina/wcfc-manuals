@@ -84,7 +84,7 @@ public class ManualsConfiguration extends Configuration {
     if (getMode().equals("DEV")) {
       return "http://localhost:9323";
     } else {
-      return "https://manuals.wingsofcarolina.org";
+      return getManualsServer();
     }
   }
 }
