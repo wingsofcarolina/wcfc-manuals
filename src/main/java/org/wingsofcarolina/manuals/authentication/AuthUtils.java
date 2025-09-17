@@ -8,6 +8,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.ws.rs.core.Cookie;
 import jakarta.ws.rs.core.NewCookie;
+import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import javax.crypto.SecretKey;
@@ -22,82 +23,42 @@ public class AuthUtils {
 
   private static AuthUtils instance = null;
 
-  // For SecretKey generation
-  private byte[] encoded = {
-    -8,
-    -36,
-    93,
-    58,
-    -106,
-    123,
-    -77,
-    -120,
-    -119,
-    80,
-    -67,
-    -58,
-    -103,
-    40,
-    8,
-    -81,
-    4,
-    -91,
-    58,
-    83,
-    -67,
-    69,
-    22,
-    71,
-    74,
-    -109,
-    -125,
-    67,
-    -72,
-    -39,
-    -11,
-    -63,
-    42,
-    1,
-    5,
-    3,
-    -32,
-    -97,
-    -21,
-    -67,
-    -127,
-    47,
-    -46,
-    -108,
-    99,
-    -69,
-    36,
-    120,
-    -67,
-    92,
-    113,
-    51,
-    96,
-    34,
-    67,
-    -12,
-    -44,
-    -31,
-    -117,
-    -37,
-    92,
-    -97,
-    -100,
-    67,
-  };
+  private static final String JWT_SECRET_ENV_VAR = "WCFC_JWT_SECRET";
 
   private SecretKey key;
   private JwtParser parser;
   private ObjectMapper mapper;
 
   public AuthUtils() {
-    key = Keys.hmacShaKeyFor(encoded);
+    key = Keys.hmacShaKeyFor(getSecretKeyBytes());
     parser = Jwts.parser().verifyWith(key).build();
     mapper = new ObjectMapper();
+  }
+
+  private byte[] getSecretKeyBytes() {
+    String base64Key = System.getenv(JWT_SECRET_ENV_VAR);
+
+    if (base64Key == null || base64Key.trim().isEmpty()) {
+      String errorMsg = String.format(
+        "JWT secret key not found in environment variable '%s'. Application cannot start without a valid JWT secret key.",
+        JWT_SECRET_ENV_VAR
+      );
+      LOG.error(errorMsg);
+      throw new IllegalStateException(errorMsg);
+    }
+
+    LOG.info("JWT secret key loaded from environment variable '{}'", JWT_SECRET_ENV_VAR);
+
+    try {
+      return Base64.getDecoder().decode(base64Key);
+    } catch (IllegalArgumentException e) {
+      String errorMsg = String.format(
+        "Invalid Base64 encoding in JWT secret key from environment variable '%s'",
+        JWT_SECRET_ENV_VAR
+      );
+      LOG.error(errorMsg, e);
+      throw new IllegalStateException(errorMsg, e);
+    }
   }
 
   public static AuthUtils instance() {
