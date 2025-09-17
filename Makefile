@@ -30,6 +30,7 @@ build: docker/.build
 
 .PHONY: push
 push: docker/.build
+	@echo Pushing $(CONTAINER_TAG)...
 	@podman push $(CONTAINER_TAG)
 
 .PHONY: launch
