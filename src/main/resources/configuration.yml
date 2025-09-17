@@ -27,10 +27,6 @@ mockUser: ${MOCKUSER:-none}
 slackNotify: ${SLACK_TOKEN_NOTIFICATIONS:-none}     # Targets #notification
 slackManuals: ${SLACK_TOKEN_MANUALS:-none}    # Targets #manuals
 
-# Slack OAuth credentials
-slackClientId: ${SLACK_CLIENT_ID:-none}
-slackClientSecret: ${SLACK_CLIENT_SECRET:-none}
-
 # Gmail API configuration
 # Note: gmailServiceAccountKey is read directly from GMAIL_SERVICE_ACCOUNT_KEY environment variable
 gmailImpersonateUser: ${GMAIL_IMPERSONATE_USER:-no-reply@wingsofcarolina.org}

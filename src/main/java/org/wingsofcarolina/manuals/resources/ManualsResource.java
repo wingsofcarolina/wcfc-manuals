@@ -80,7 +80,6 @@ import org.wingsofcarolina.manuals.model.EquipmentType;
 import org.wingsofcarolina.manuals.model.User;
 import org.wingsofcarolina.manuals.services.HousekeepingService;
 import org.wingsofcarolina.manuals.slack.Slack;
-import org.wingsofcarolina.manuals.slack.SlackAuthService;
 
 /**
  * @author dwight
@@ -97,8 +96,6 @@ public class ManualsResource {
   private static String versionOverride = null;
   private DateTimeFormatter dateFormatGmt;
   private DateTimeFormatter dateFormatArchive;
-
-  private SlackAuthService slackAuth;
 
   private AuthUtils authUtils;
 
@@ -150,10 +147,6 @@ public class ManualsResource {
     // Get the startup date/time format in GMT and for the archive
     dateFormatGmt = DateTimeFormatter.ofPattern("yyyy/MM/dd - HH:mm:ss z");
     dateFormatArchive = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
-    // Create Slack authentication API service object
-    slackAuth =
-      new SlackAuthService(config.getSlackClientId(), config.getSlackClientSecret());
 
     // Load data store (from JSON files, simplistic!)
     loadDataStore();
