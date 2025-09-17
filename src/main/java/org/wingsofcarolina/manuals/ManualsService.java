@@ -13,8 +13,6 @@ import java.text.SimpleDateFormat;
 import java.util.EnumSet;
 import java.util.TimeZone;
 import org.eclipse.jetty.ee10.servlets.CrossOriginFilter;
-import org.knowm.dropwizard.sundial.SundialBundle;
-import org.knowm.dropwizard.sundial.SundialConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wingsofcarolina.manuals.common.RuntimeExceptionMapper;
@@ -51,16 +49,6 @@ public class ManualsService extends Application<ManualsConfiguration> {
     // bootstrap.addBundle(new AssetsBundle("/doc", "/doc", "index.html","html"));
     bootstrap.addBundle(new AssetsBundle("/assets/", "/", "index.html"));
     bootstrap.addBundle(new MultiPartBundle());
-    bootstrap.addBundle(
-      new SundialBundle<ManualsConfiguration>() {
-        @Override
-        public SundialConfiguration getSundialConfiguration(
-          ManualsConfiguration configuration
-        ) {
-          return configuration.getSundialConfiguration();
-        }
-      }
-    );
   }
 
   @Override

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.core.Configuration;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import org.knowm.dropwizard.sundial.SundialConfiguration;
 
 public class ManualsConfiguration extends Configuration {
 
@@ -36,10 +35,6 @@ public class ManualsConfiguration extends Configuration {
 
   @JsonProperty
   String smtpHost;
-
-  @Valid
-  @NotNull
-  public SundialConfiguration sundialConfiguration = new SundialConfiguration();
 
   public ManualsConfiguration() {
     ManualsConfiguration.instance = this;
@@ -91,10 +86,5 @@ public class ManualsConfiguration extends Configuration {
     } else {
       return "https://manuals.wingsofcarolina.org";
     }
-  }
-
-  @JsonProperty("sundial")
-  public SundialConfiguration getSundialConfiguration() {
-    return sundialConfiguration;
   }
 }

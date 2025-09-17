@@ -7,7 +7,7 @@ root: ${ROOT:-./root}
 # container. Otherwise give the IP:PORT for the MongoDB process.
 mongodb: ${MONGODB:-mongodb://mongodb}
 
-# URL of the server where the groundschool service is running
+# URL of the server where the manuals service is running
 manualsServer: ${MANUALSSERVER:-https://manuals.wingsofcarolina.org}
 
 # Operational mode, DEV or PROD
@@ -26,16 +26,7 @@ slackManuals: ${SLACK_TOKEN_MANUALS:-none}    # Targets #manuals
 # SMTP configuration
 smtpHost: ${SMTP_HOST:-smtp-relay.gmail.com}
 
-# Configure the Sundial job management system    
-sundial:
-  thread-pool-size: 10
-  shutdown-on-unload: true
-  start-delay-seconds: 0
-  start-scheduler-on-load: true
-  global-lock-on-load: false
-  annotated-jobs-package-name: org.wingsofcarolina.manuals.jobs
-  tasks: [startjob, stopjob]
-
+# Scheduled jobs are now handled via HTTP endpoints called by Cloud Scheduler
 
 # Configure ports used by DropWizard
 server:

@@ -78,6 +78,7 @@ import org.wingsofcarolina.manuals.model.AircraftType;
 import org.wingsofcarolina.manuals.model.Equipment;
 import org.wingsofcarolina.manuals.model.EquipmentType;
 import org.wingsofcarolina.manuals.model.User;
+import org.wingsofcarolina.manuals.services.HousekeepingService;
 import org.wingsofcarolina.manuals.slack.Slack;
 import org.wingsofcarolina.manuals.slack.SlackAuthService;
 
@@ -203,6 +204,9 @@ public class ManualsResource {
   @Path("user")
   @Produces(MediaType.APPLICATION_JSON)
   public Response user(@CookieParam("wcfc.manuals.token") Cookie cookie) {
+    // Trigger housekeeping if needed (runs asynchronously)
+    HousekeepingService.getInstance().triggerHousekeepingIfNeeded();
+
     User user = null;
     Boolean anonymous = false;
     Boolean badcookie = false;
@@ -431,6 +435,9 @@ public class ManualsResource {
   @Path("tree")
   @Produces(MediaType.APPLICATION_JSON)
   public Response getTree(@CookieParam("wcfc.manuals.token") Cookie cookie) {
+    // Trigger housekeeping if needed (runs asynchronously)
+    HousekeepingService.getInstance().triggerHousekeepingIfNeeded();
+
     // Create the head entry
     TreeEntry head = new TreeEntry("WCFC Flight Manuals", null);
     head.setOpen(true);
