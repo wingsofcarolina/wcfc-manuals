@@ -225,10 +225,14 @@ public class ManualsResource {
 
     if (cookie != null) {
       Jws<Claims> claims = authUtils.decodeCookie(cookie);
-      if (
-        claims.getBody().get("version") == null &&
-        user.getEmail().equals("dwight@openweave.org")
-      ) {
+      if (claims != null) {
+        if (
+          claims.getBody().get("version") == null &&
+          user.getEmail().equals("dwight@openweave.org")
+        ) {
+          badcookie = true;
+        }
+      } else {
         badcookie = true;
       }
     } else {
@@ -391,12 +395,10 @@ public class ManualsResource {
   @Path("equipment")
   @Produces(MediaType.APPLICATION_JSON)
   public Response getEquipment(@CookieParam("wcfc.manuals.token") Cookie cookie) {
-    User user = null;
-
     try {
       lock.lock();
 
-      // Always return aircraft in type sorted order
+      // Always return equipment in type sorted order
       equipmentCache.sort(manual_compare);
     } finally {
       lock.unlock();

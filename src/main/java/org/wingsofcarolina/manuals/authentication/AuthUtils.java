@@ -89,7 +89,12 @@ public class AuthUtils {
     Jws<Claims> claims = null;
     String compactJws = cookie.getValue();
     if (compactJws != null && !compactJws.isEmpty()) {
-      claims = parser.parseSignedClaims(compactJws);
+      try {
+        claims = parser.parseSignedClaims(compactJws);
+      } catch (Exception e) {
+        LOG.warn("Invalid JWT token provided: {}", e.getMessage());
+        claims = null;
+      }
     }
     return claims;
   }
@@ -149,16 +154,18 @@ public class AuthUtils {
 
     if (cookie != null) {
       Jws<Claims> claims = decodeCookie(cookie);
-      Claims body = claims.getBody();
+      if (claims != null) {
+        Claims body = claims.getBody();
 
-      user = new User((String) body.getSubject(), (String) body.get("email"));
+        user = new User((String) body.getSubject(), (String) body.get("email"));
 
-      HashMap<?, ?> mymap = mapper.convertValue(body, HashMap.class);
+        HashMap<?, ?> mymap = mapper.convertValue(body, HashMap.class);
 
-      if (mymap.containsKey("admin") || !ManualsConfiguration.instance().getAuth()) {
-        user.setAdmin((Boolean) body.get("admin"));
-      } else {
-        user.setAdmin(false);
+        if (mymap.containsKey("admin") || !ManualsConfiguration.instance().getAuth()) {
+          user.setAdmin((Boolean) body.get("admin"));
+        } else {
+          user.setAdmin(false);
+        }
       }
     }
     return user;
