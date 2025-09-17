@@ -143,7 +143,29 @@
       <artifactId>tika-core</artifactId>
       <version>3.2.3</version>
     </dependency>
-    <!-- https://mvnrepository.com/artifact/javax.mail/javax.mail-api -->
+    <!-- Gmail API for sending emails -->
+    <dependency>
+      <groupId>com.google.apis</groupId>
+      <artifactId>google-api-services-gmail</artifactId>
+      <version>v1-rev20240520-2.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.auth</groupId>
+      <artifactId>google-auth-library-oauth2-http</artifactId>
+      <version>1.28.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.auth</groupId>
+      <artifactId>google-auth-library-credentials</artifactId>
+      <version>1.28.0</version>
+    </dependency>
+    <!-- Apache Commons Codec for Base64 encoding -->
+    <dependency>
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
+      <version>1.17.1</version>
+    </dependency>
+    <!-- JavaMail API for creating MIME messages -->
     <dependency>
       <groupId>com.sun.mail</groupId>
       <artifactId>javax.mail</artifactId>

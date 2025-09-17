@@ -27,8 +27,9 @@ mockUser: ${MOCKUSER:-none}
 slackNotify: ${SLACK_TOKEN_NOTIFICATIONS:-none}     # Targets #notification
 slackManuals: ${SLACK_TOKEN_MANUALS:-none}    # Targets #manuals
 
-# SMTP configuration
-smtpHost: ${SMTP_HOST:-smtp-relay.gmail.com}
+# Gmail API configuration
+gmailServiceAccountKey: ${GMAIL_SERVICE_ACCOUNT_KEY:-}
+gmailImpersonateUser: ${GMAIL_IMPERSONATE_USER:-no-reply@wingsofcarolina.org}
 
 # Scheduled jobs are now handled via HTTP endpoints called by Cloud Scheduler
 

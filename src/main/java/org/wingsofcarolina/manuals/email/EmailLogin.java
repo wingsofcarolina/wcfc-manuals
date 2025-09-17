@@ -1,13 +1,13 @@
 package org.wingsofcarolina.manuals.email;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import javax.mail.MessagingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wingsofcarolina.manuals.domain.VerificationCode;
 
 public class EmailLogin {
-
-  // This address will be used as the sender for SMTP emails
-  static final String FROM = "webmaster@wingsofcarolina.org";
 
   // This is the server to which we need to direct the verification
   static String SERVER = null;
@@ -15,8 +15,8 @@ public class EmailLogin {
   // The subject line for the email.
   static final String SUBJECT = "WCFC Manuals Login";
 
-  // SMTP service instance
-  private static SmtpService smtpService;
+  // Gmail service instance
+  private static GmailService gmailService;
 
   // The HTML body for the email.
   static final String HTMLBODY =
@@ -55,16 +55,21 @@ public class EmailLogin {
   private static final Logger LOG = LoggerFactory.getLogger(EmailLogin.class);
 
   /**
-   * Initialize the email service with server information using SMTP.
+   * Initialize the email service with server information using Gmail API.
    *
    * @param server The server URL for email templates
-   * @param smtpHost The SMTP host to connect to
+   * @param serviceAccountKeyJson The service account key in JSON format
+   * @param impersonateUser The email address to impersonate
    */
-  public static void initialize(String server, String smtpHost) {
+  public static void initialize(
+    String server,
+    String serviceAccountKeyJson,
+    String impersonateUser
+  ) {
     LOG.info(
-      "Initializing email service with server: {} and SMTP host: {}",
+      "Initializing email service with server: {}, Gmail API impersonation user: {}",
       server,
-      smtpHost
+      impersonateUser
     );
 
     if (server == null || server.trim().isEmpty()) {
@@ -72,32 +77,55 @@ public class EmailLogin {
       throw new IllegalArgumentException("Server parameter cannot be null or empty");
     }
 
-    if (smtpHost == null || smtpHost.trim().isEmpty()) {
-      LOG.error("SMTP host parameter is null or empty");
-      throw new IllegalArgumentException("SMTP host parameter cannot be null or empty");
+    if (serviceAccountKeyJson == null || serviceAccountKeyJson.trim().isEmpty()) {
+      LOG.error("Service account key JSON parameter is null or empty");
+      throw new IllegalArgumentException(
+        "Service account key JSON parameter cannot be null or empty"
+      );
+    }
+
+    if (impersonateUser == null || impersonateUser.trim().isEmpty()) {
+      LOG.error("Impersonate user parameter is null or empty");
+      throw new IllegalArgumentException(
+        "Impersonate user parameter cannot be null or empty"
+      );
     }
 
     EmailLogin.SERVER = server;
 
     try {
-      LOG.debug(
-        "Creating SMTP service with from address: {} and host: {}",
-        FROM,
-        smtpHost
+      LOG.debug("Creating Gmail service with impersonate user: {}", impersonateUser);
+      gmailService = new GmailService(serviceAccountKeyJson, impersonateUser);
+      LOG.info(
+        "Email service initialized successfully with Gmail API for user: {}",
+        impersonateUser
       );
-      smtpService = new SmtpService(FROM, smtpHost);
-      LOG.info("Email service initialized successfully with SMTP host: {}", smtpHost);
     } catch (IllegalArgumentException e) {
-      LOG.error("Invalid configuration for SMTP service: {}", e.getMessage(), e);
+      LOG.error("Invalid configuration for Gmail service: {}", e.getMessage(), e);
       throw e;
-    } catch (Exception e) {
+    } catch (IOException e) {
       LOG.error(
-        "Failed to initialize SMTP service with host {}: {}",
-        smtpHost,
+        "Failed to initialize Gmail service due to IO error: {}",
         e.getMessage(),
         e
       );
-      throw new RuntimeException("SMTP service initialization failed", e);
+      throw new RuntimeException(
+        "Gmail service initialization failed due to IO error",
+        e
+      );
+    } catch (GeneralSecurityException e) {
+      LOG.error(
+        "Failed to initialize Gmail service due to security error: {}",
+        e.getMessage(),
+        e
+      );
+      throw new RuntimeException(
+        "Gmail service initialization failed due to security error",
+        e
+      );
+    } catch (Exception e) {
+      LOG.error("Failed to initialize Gmail service: {}", e.getMessage(), e);
+      throw new RuntimeException("Gmail service initialization failed", e);
     }
   }
 
@@ -121,10 +149,10 @@ public class EmailLogin {
       );
     }
 
-    if (smtpService == null) {
-      LOG.error("Cannot send email: smtpService not initialized (smtpService is null)");
+    if (gmailService == null) {
+      LOG.error("Cannot send email: gmailService not initialized (gmailService is null)");
       throw new IllegalStateException(
-        "Email service not properly initialized - smtpService is null"
+        "Email service not properly initialized - gmailService is null"
       );
     }
 
@@ -165,9 +193,9 @@ public class EmailLogin {
 
     // Send the email
     try {
-      smtpService.sendEmail(email, SUBJECT, textBody, htmlBody);
-      LOG.info("Email sent to {}", email);
-    } catch (javax.mail.MessagingException e) {
+      gmailService.sendEmail(email, SUBJECT, textBody, htmlBody);
+      LOG.info("Email sent to {} via Gmail API", email);
+    } catch (MessagingException e) {
       String errorMsg = e.getMessage();
       LOG.error(
         "MessagingException while sending verification email to {}: {}",
@@ -176,39 +204,51 @@ public class EmailLogin {
         e
       );
 
+      throw new RuntimeException(
+        "Failed to send verification email due to messaging error",
+        e
+      );
+    } catch (IOException e) {
+      String errorMsg = e.getMessage();
+      LOG.error(
+        "IOException while sending verification email to {}: {}",
+        email,
+        errorMsg,
+        e
+      );
+
       // Log specific guidance based on error type
       if (errorMsg != null) {
-        if (errorMsg.contains("Connection refused")) {
+        if (errorMsg.contains("403") || errorMsg.contains("Forbidden")) {
           LOG.error(
-            "EMAIL SEND FAILURE: Cannot connect to SMTP server. " +
-            "Check Google Cloud firewall rules and SMTP relay configuration."
+            "EMAIL SEND FAILURE: Gmail API access denied. " +
+            "Check service account permissions and domain-wide delegation setup."
           );
-        } else if (errorMsg.contains("Authentication failed")) {
+        } else if (errorMsg.contains("401") || errorMsg.contains("Unauthorized")) {
           LOG.error(
-            "EMAIL SEND FAILURE: SMTP authentication failed. " +
-            "Verify Google Cloud SMTP relay settings and authentication configuration."
+            "EMAIL SEND FAILURE: Gmail API authentication failed. " +
+            "Check service account credentials and impersonation settings."
           );
-        } else if (errorMsg.contains("550")) {
+        } else if (errorMsg.contains("400") || errorMsg.contains("Bad Request")) {
           LOG.error(
-            "EMAIL SEND FAILURE: Recipient {} rejected by server. " +
-            "Email address may be invalid or blocked.",
-            email
+            "EMAIL SEND FAILURE: Invalid email format or content. " +
+            "Check email addresses and message structure."
           );
-        } else if (errorMsg.contains("553") || errorMsg.contains("Relaying denied")) {
+        } else if (errorMsg.contains("429") || errorMsg.contains("quota")) {
           LOG.error(
-            "EMAIL SEND FAILURE: SMTP relay denied. " +
-            "Check Google Cloud SMTP relay authorization and IP restrictions."
+            "EMAIL SEND FAILURE: Gmail API quota exceeded. " +
+            "Check API usage limits and quotas in Google Cloud Console."
           );
         } else if (errorMsg.contains("timeout")) {
           LOG.error(
-            "EMAIL SEND FAILURE: Connection timeout. " +
-            "Check Google Cloud network connectivity and SMTP server availability."
+            "EMAIL SEND FAILURE: Gmail API request timed out. " +
+            "Check network connectivity and API availability."
           );
         }
       }
 
       throw new RuntimeException(
-        "Failed to send verification email due to messaging error",
+        "Failed to send verification email due to Gmail API error",
         e
       );
     } catch (Exception e) {

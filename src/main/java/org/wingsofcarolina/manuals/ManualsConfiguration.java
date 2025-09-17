@@ -37,7 +37,10 @@ public class ManualsConfiguration extends Configuration {
   String manualsServer;
 
   @JsonProperty
-  String smtpHost;
+  String gmailServiceAccountKey;
+
+  @JsonProperty
+  String gmailImpersonateUser;
 
   public ManualsConfiguration() {
     ManualsConfiguration.instance = this;
@@ -83,8 +86,12 @@ public class ManualsConfiguration extends Configuration {
     return manualsServer;
   }
 
-  public String getSmtpHost() {
-    return smtpHost;
+  public String getGmailServiceAccountKey() {
+    return gmailServiceAccountKey;
+  }
+
+  public String getGmailImpersonateUser() {
+    return gmailImpersonateUser;
   }
 
   public String getGs() {
