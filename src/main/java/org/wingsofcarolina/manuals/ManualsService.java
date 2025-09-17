@@ -49,14 +49,6 @@ public class ManualsService extends Application<ManualsConfiguration> {
 
     // bootstrap.addBundle(new AssetsBundle("/doc", "/doc", "index.html","html"));
     bootstrap.addBundle(new AssetsBundle("/assets/", "/", "index.html"));
-
-    // Add additional assets bundle for SPA fallback on specific routes
-    bootstrap.addBundle(new AssetsBundle("/assets/", "/equipment", "index.html"));
-    bootstrap.addBundle(new AssetsBundle("/assets/", "/contact", "index.html"));
-    bootstrap.addBundle(new AssetsBundle("/assets/", "/about", "index.html"));
-    bootstrap.addBundle(new AssetsBundle("/assets/", "/login", "index.html"));
-    bootstrap.addBundle(new AssetsBundle("/assets/", "/manage", "index.html"));
-    bootstrap.addBundle(new AssetsBundle("/assets/", "/view", "index.html"));
     bootstrap.addBundle(new MultiPartBundle());
   }
 
