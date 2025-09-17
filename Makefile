@@ -14,7 +14,7 @@ else
 endif
 endif
 
-$(APP_JAR): pom.xml client/node_modules $(JAVA_FILES)
+$(APP_JAR): pom.xml client/node_modules $(JAVA_FILES) $(shell find src/main/resources -type f)
 	@mvn --batch-mode
 
 client/node_modules: client/package.json client/package-lock.json
