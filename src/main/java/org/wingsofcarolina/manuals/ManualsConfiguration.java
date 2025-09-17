@@ -31,6 +31,9 @@ public class ManualsConfiguration extends Configuration {
   String mongodb;
 
   @JsonProperty
+  String mongodbDatabase;
+
+  @JsonProperty
   String manualsServer;
 
   @JsonProperty
@@ -70,6 +73,10 @@ public class ManualsConfiguration extends Configuration {
 
   public String getMongodb() {
     return mongodb;
+  }
+
+  public String getMongodbDatabase() {
+    return mongodbDatabase;
   }
 
   public String getManualsServer() {

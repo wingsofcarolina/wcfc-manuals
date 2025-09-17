@@ -25,7 +25,7 @@ public class Persistence {
 
   private static Persistence instance = null;
 
-  public Persistence initialize(String mongodb) {
+  public Persistence initialize(String mongodb, String databaseName) {
     if (instance == null) {
       LOG.info("Connecting to MongoDB with '{}'", mongodb);
 
@@ -52,10 +52,12 @@ public class Persistence {
         );
 
         // Test the connection
-        mongoClient.getDatabase("manuals").runCommand(new org.bson.Document("ping", 1));
-        LOG.info("Successfully connected to MongoDB");
+        mongoClient
+          .getDatabase(databaseName)
+          .runCommand(new org.bson.Document("ping", 1));
+        LOG.info("Successfully connected to MongoDB database: {}", databaseName);
 
-        datastore = Morphia.createDatastore(mongoClient, "manuals");
+        datastore = Morphia.createDatastore(mongoClient, databaseName);
 
         // Entity classes will be mapped automatically when first used in Morphia 2.5+
         // No need for explicit mapping calls

@@ -81,7 +81,7 @@ public class ManualsService extends Application<ManualsConfiguration> {
     configureCors(env);
 
     // Set up the Persistence singleton
-    new Persistence().initialize(config.getMongodb());
+    new Persistence().initialize(config.getMongodb(), config.getMongodbDatabase());
 
     // Make sure the email class knows the right server to reference
     EmailLogin.initialize(config.getManualsServer(), config.getSmtpHost());

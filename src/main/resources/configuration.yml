@@ -8,6 +8,9 @@ root: ${ROOT:-./root}
 # For MongoDB Atlas: mongodb+srv://username:password@cluster.mongodb.net/database
 mongodb: ${MONGODB:-mongodb://mongodb}
 
+# MongoDB database name
+mongodbDatabase: ${MONGODB_DATABASE:-wcfc-manuals}
+
 # URL of the server where the manuals service is running
 manualsServer: ${MANUALSSERVER:-https://manuals.wingsofcarolina.org}
 
