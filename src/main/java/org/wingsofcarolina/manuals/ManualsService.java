@@ -47,7 +47,7 @@ public class ManualsService extends Application<ManualsConfiguration> {
     );
 
     // bootstrap.addBundle(new AssetsBundle("/doc", "/doc", "index.html","html"));
-    bootstrap.addBundle(new AssetsBundle("/assets/lib/public/ui/", "/", "index.html"));
+    bootstrap.addBundle(new AssetsBundle("/assets/", "/", "index.html"));
     bootstrap.addBundle(new MultiPartBundle());
   }
 

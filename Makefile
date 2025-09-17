@@ -32,6 +32,17 @@ build: docker/.build
 push: docker/.build
 	@podman push $(CONTAINER_TAG)
 
+.PHONY: launch
+launch: docker/.build
+	@echo Launching app...
+	@./launch $(CONTAINER_TAG)
+	@echo App should be running at http://localhost:9300
+
+.PHONY: shutdown
+shutdown:
+	@echo Shutting down app...
+	@podman rm -f $(APP_NAME)
+
 .PHONY: format
 format: client/node_modules
 	@echo Formatting pom.xml files...

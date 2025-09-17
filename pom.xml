@@ -245,7 +245,7 @@
                 </exec>
                 <delete dir="target/classes/assets"/>
                 <copy todir="target/classes/assets">
-                  <fileset dir="client/.svelte-kit/output/client">
+                  <fileset dir="client/build">
                     <include name="**"/>
                   </fileset>
                 </copy>
