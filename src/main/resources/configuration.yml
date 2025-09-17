@@ -28,7 +28,7 @@ slackNotify: ${SLACK_TOKEN_NOTIFICATIONS:-none}     # Targets #notification
 slackManuals: ${SLACK_TOKEN_MANUALS:-none}    # Targets #manuals
 
 # Gmail API configuration
-gmailServiceAccountKey: ${GMAIL_SERVICE_ACCOUNT_KEY:-}
+# Note: gmailServiceAccountKey is read directly from GMAIL_SERVICE_ACCOUNT_KEY environment variable
 gmailImpersonateUser: ${GMAIL_IMPERSONATE_USER:-no-reply@wingsofcarolina.org}
 
 # Scheduled jobs are now handled via HTTP endpoints called by Cloud Scheduler

@@ -56,16 +56,12 @@ public class EmailLogin {
 
   /**
    * Initialize the email service with server information using Gmail API.
+   * The service account key is read directly from the GMAIL_SERVICE_ACCOUNT_KEY environment variable.
    *
    * @param server The server URL for email templates
-   * @param serviceAccountKeyJson The service account key in JSON format
    * @param impersonateUser The email address to impersonate
    */
-  public static void initialize(
-    String server,
-    String serviceAccountKeyJson,
-    String impersonateUser
-  ) {
+  public static void initialize(String server, String impersonateUser) {
     LOG.info(
       "Initializing email service with server: {}, Gmail API impersonation user: {}",
       server,
@@ -77,17 +73,19 @@ public class EmailLogin {
       throw new IllegalArgumentException("Server parameter cannot be null or empty");
     }
 
-    if (serviceAccountKeyJson == null || serviceAccountKeyJson.trim().isEmpty()) {
-      LOG.error("Service account key JSON parameter is null or empty");
-      throw new IllegalArgumentException(
-        "Service account key JSON parameter cannot be null or empty"
-      );
-    }
-
     if (impersonateUser == null || impersonateUser.trim().isEmpty()) {
       LOG.error("Impersonate user parameter is null or empty");
       throw new IllegalArgumentException(
         "Impersonate user parameter cannot be null or empty"
+      );
+    }
+
+    // Read service account key from environment variable
+    String serviceAccountKeyJson = System.getenv("GMAIL_SERVICE_ACCOUNT_KEY");
+    if (serviceAccountKeyJson == null || serviceAccountKeyJson.trim().isEmpty()) {
+      LOG.error("GMAIL_SERVICE_ACCOUNT_KEY environment variable is null or empty");
+      throw new IllegalArgumentException(
+        "GMAIL_SERVICE_ACCOUNT_KEY environment variable must be set with the service account JSON"
       );
     }
 
