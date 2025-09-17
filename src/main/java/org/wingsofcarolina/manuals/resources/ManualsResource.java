@@ -1173,6 +1173,15 @@ public class ManualsResource {
 
     pathnames = f.list(filter);
 
+    // Check if pathnames is null (directory doesn't exist or I/O error)
+    if (pathnames == null) {
+      LOG.error(
+        "Failed to list files in directory: {}. Directory may not exist or I/O error occurred.",
+        root
+      );
+      return;
+    }
+
     for (String fileName : pathnames) {
       String name = zipOutputName(fileName);
       try (FileInputStream fis = new FileInputStream(new File(root + "/" + fileName))) {
