@@ -28,14 +28,11 @@ public class User {
   }
 
   public Boolean getAdmin() {
-    if (email.contentEquals("dfrye@planez.co")) {
-      return true;
-    } else if (email.contentEquals("dwight@openweave.org")) {
-      return true;
-    } else if (email.contentEquals("kwcycler@gmail.com")) {
-      return true;
-    }
-    return admin;
+    // Check database for admin status
+    org.wingsofcarolina.manuals.domain.Member member = org.wingsofcarolina.manuals.domain.Member.getByEmail(
+      this.email
+    );
+    return member != null ? member.getAdmin() : false;
   }
 
   public void setAdmin(Boolean admin) {

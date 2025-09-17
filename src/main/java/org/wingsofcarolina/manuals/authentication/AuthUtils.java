@@ -143,7 +143,6 @@ public class AuthUtils {
       .issuedAt(new Date())
       .subject(user.getName())
       .claim("email", user.getEmail())
-      .claim("admin", user.getAdmin())
       .claim("version", 1)
       .signWith(key)
       .compact();
