@@ -6,7 +6,7 @@ import org.wingsofcarolina.manuals.domain.VerificationCode;
 
 public class EmailLogin {
 
-  // This address must be configured with Gmail API access
+  // This address will be used as the sender for SMTP emails
   static final String FROM = "webmaster@wingsofcarolina.org";
 
   // This is the server to which we need to direct the verification
@@ -15,8 +15,8 @@ public class EmailLogin {
   // The subject line for the email.
   static final String SUBJECT = "WCFC Manuals Login";
 
-  // Gmail service instance
-  private static GmailService gmailService;
+  // SMTP service instance
+  private static SmtpService smtpService;
 
   // The HTML body for the email.
   static final String HTMLBODY =
@@ -55,31 +55,24 @@ public class EmailLogin {
   private static final Logger LOG = LoggerFactory.getLogger(EmailLogin.class);
 
   /**
-   * Initialize the email service with server information and Gmail credentials from environment.
+   * Initialize the email service with server information using SMTP.
    *
    * @param server The server URL for email templates
    */
   public static void initialize(String server) {
     EmailLogin.SERVER = server;
 
-    // Get Gmail service account JSON from environment variable
-    String credentialsJson = System.getenv("GMAIL_SERVICE_ACCOUNT_JSON");
-    if (credentialsJson == null || credentialsJson.trim().isEmpty()) {
-      LOG.error("GMAIL_SERVICE_ACCOUNT_JSON environment variable not set");
-      throw new RuntimeException("Gmail service account JSON not configured");
-    }
-
     try {
-      gmailService = new GmailService(credentialsJson, FROM);
-      LOG.info("Email service initialized successfully with Gmail API");
+      smtpService = new SmtpService(FROM);
+      LOG.info("Email service initialized successfully with SMTP");
     } catch (Exception e) {
-      LOG.error("Failed to initialize Gmail service: {}", e.getMessage(), e);
-      throw new RuntimeException("Gmail service initialization failed", e);
+      LOG.error("Failed to initialize SMTP service: {}", e.getMessage(), e);
+      throw new RuntimeException("SMTP service initialization failed", e);
     }
   }
 
   public void emailTo(String email, String uuid) {
-    if (SERVER != null && gmailService != null) {
+    if (SERVER != null && smtpService != null) {
       Integer code = VerificationCode.makeEntry(uuid).getCode();
 
       String htmlBody = HTMLBODY
@@ -94,7 +87,7 @@ public class EmailLogin {
         .replace("CODE", code.toString());
 
       try {
-        gmailService.sendEmail(email, SUBJECT, textBody, htmlBody);
+        smtpService.sendEmail(email, SUBJECT, textBody, htmlBody);
         LOG.info(
           "Verification email sent successfully to {} with id {} and code {}",
           email,
@@ -106,7 +99,7 @@ public class EmailLogin {
         throw new RuntimeException("Failed to send verification email", e);
       }
     } else {
-      LOG.error("Cannot send email: SERVER or gmailService not initialized");
+      LOG.error("Cannot send email: SERVER or smtpService not initialized");
       throw new IllegalStateException("Email service not properly initialized");
     }
   }

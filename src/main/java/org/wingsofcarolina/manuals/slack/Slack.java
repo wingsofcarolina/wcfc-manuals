@@ -1,13 +1,13 @@
 package org.wingsofcarolina.manuals.slack;
 
 import java.io.IOException;
-import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wingsofcarolina.manuals.ManualsConfiguration;
@@ -108,10 +108,11 @@ public class Slack {
         httpPost.setEntity(stringEntity);
         try {
           CloseableHttpResponse response = httpclient.execute(httpPost);
-          if (response.getStatusLine().getStatusCode() != 200) {
+          if (response.getCode() != 200) {
             LOG.error(
-              "Failed to successfully send message to Slack: {}",
-              response.getStatusLine()
+              "Failed to successfully send message to Slack: {} {}",
+              response.getCode(),
+              response.getReasonPhrase()
             );
             return false;
           }
