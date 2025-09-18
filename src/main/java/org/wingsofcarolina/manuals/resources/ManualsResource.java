@@ -1001,10 +1001,12 @@ public class ManualsResource {
     List<String> files = new ArrayList<>();
     files.addAll(listFiles("dynamic"));
 
-    // Filter for only wcfc-manuals-* files
+    // Filter for only wcfc-manuals-*.zip files (exclude temporary .tmp files)
     List<String> manualFiles = files
       .stream()
-      .filter(filename -> filename.startsWith("wcfc-manuals-"))
+      .filter(filename ->
+        filename.startsWith("wcfc-manuals-") && filename.endsWith(".zip")
+      )
       .collect(Collectors.toList());
 
     if (!manualFiles.isEmpty()) {
@@ -1049,26 +1051,23 @@ public class ManualsResource {
   public Response archive(@CookieParam("wcfc.manuals.token") Cookie cookie)
     throws IOException {
     String filename = "none";
+    String tempFilename = "none";
     String fullpath = "none";
+    String tempFullpath = "none";
     ZonedDateTime now = LocalDateTime.now().atZone(ZoneId.of("US/Eastern"));
     User user = authUtils.getUserFromCookie(cookie);
     if (user != null) {
       LOG.info("Starting new archive generation.");
 
-      // Remove all the old wcfc-manuals-* files in the 'dynamic' directory (should only be one)
-      Set<String> files = listFiles("dynamic");
-      for (String name : files) {
-        if (name.startsWith("wcfc-manuals-")) {
-          File file = new File("dynamic/" + name);
-          file.delete();
-        }
-      }
-
       ZipOutputStream zipOut = null;
       try {
         filename = "wcfc-manuals-" + dateFormatArchive.format(now) + ".zip";
+        tempFilename = "wcfc-manuals-" + dateFormatArchive.format(now) + ".tmp";
         fullpath = "dynamic/" + filename;
-        FileOutputStream fout = new FileOutputStream(new File(fullpath));
+        tempFullpath = "dynamic/" + tempFilename;
+
+        // Create the new archive with a temporary filename
+        FileOutputStream fout = new FileOutputStream(new File(tempFullpath));
         zipOut = new ZipOutputStream(fout);
 
         byte[] guidePage = generateGuidePage(filename).toString().getBytes();
@@ -1086,11 +1085,48 @@ public class ManualsResource {
         addDataFiles(zipOut);
       } catch (IOException ex) {
         LOG.info("IOException during archive generation : {}", ex.getMessage());
+        // Clean up temporary file if creation failed
+        if (tempFullpath != null) {
+          File tempFile = new File(tempFullpath);
+          if (tempFile.exists()) {
+            tempFile.delete();
+          }
+        }
+        throw ex; // Re-throw to prevent further processing
       } finally {
-        // 	Wrap up the Zip file
-        zipOut.close();
+        // Wrap up the Zip file
+        if (zipOut != null) {
+          zipOut.close();
+        }
       }
-      LOG.info("New archive generation completed.");
+
+      // Archive generation completed successfully, now atomically replace the old one
+      File tempFile = new File(tempFullpath);
+      File finalFile = new File(fullpath);
+
+      if (tempFile.exists()) {
+        // Remove all the old wcfc-manuals-* files in the 'dynamic' directory (should only be one)
+        Set<String> files = listFiles("dynamic");
+        for (String name : files) {
+          if (name.startsWith("wcfc-manuals-") && name.endsWith(".zip")) {
+            File oldFile = new File("dynamic/" + name);
+            oldFile.delete();
+          }
+        }
+
+        // Rename temporary file to final name
+        if (tempFile.renameTo(finalFile)) {
+          LOG.info("New archive generation completed successfully.");
+        } else {
+          LOG.error("Failed to rename temporary archive file to final name.");
+          // Clean up temporary file
+          tempFile.delete();
+          throw new IOException("Failed to rename temporary archive file");
+        }
+      } else {
+        LOG.error("Temporary archive file does not exist after generation.");
+        throw new IOException("Temporary archive file missing after generation");
+      }
 
       // Let the world know a new archive was generated
       long bytes = Files.size(Paths.get(fullpath));
@@ -1117,10 +1153,12 @@ public class ManualsResource {
       List<String> files = new ArrayList<>();
       files.addAll(listFiles("dynamic"));
 
-      // Filter for only wcfc-manuals-* files
+      // Filter for only wcfc-manuals-*.zip files (exclude temporary .tmp files)
       List<String> manualFiles = files
         .stream()
-        .filter(filename -> filename.startsWith("wcfc-manuals-"))
+        .filter(filename ->
+          filename.startsWith("wcfc-manuals-") && filename.endsWith(".zip")
+        )
         .collect(Collectors.toList());
 
       if (!manualFiles.isEmpty()) {
