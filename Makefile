@@ -36,7 +36,7 @@ push: docker/.build
 .PHONY: launch
 launch: docker/.build
 	@echo Launching app...
-	@./launch $(CONTAINER_TAG)
+	@./scripts/launch $(CONTAINER_TAG)
 	@echo App should be running at http://localhost:9300
 
 .PHONY: shutdown
