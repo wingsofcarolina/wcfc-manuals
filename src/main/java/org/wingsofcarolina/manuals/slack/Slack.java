@@ -25,10 +25,14 @@ public class Slack {
 
   private String notificationUrl;
   private String manualsUrl;
+  private String slackApiBaseUrl;
 
   private ManualsConfiguration config;
 
   public Slack(ManualsConfiguration config) {
+    this.config = config;
+    this.slackApiBaseUrl = config.getSlackApiBaseUrl();
+
     // Build webhook URLs from the configuration
     if (
       config.getSlackNotify() != null &&
@@ -42,7 +46,8 @@ public class Slack {
         String[] tokenParts = config.getSlackNotify().split("/");
         if (tokenParts.length == 3) {
           notificationUrl =
-            "https://hooks.slack.com/services/" +
+            slackApiBaseUrl +
+            "/services/" +
             tokenParts[0] +
             "/" +
             tokenParts[1] +
@@ -71,7 +76,8 @@ public class Slack {
         String[] tokenParts = config.getSlackManuals().split("/");
         if (tokenParts.length == 3) {
           manualsUrl =
-            "https://hooks.slack.com/services/" +
+            slackApiBaseUrl +
+            "/services/" +
             tokenParts[0] +
             "/" +
             tokenParts[1] +
@@ -89,7 +95,8 @@ public class Slack {
     }
 
     Slack.instance = this;
-    this.config = config;
+
+    LOG.info("Slack service initialized with API base URL: {}", slackApiBaseUrl);
   }
 
   public static Slack instance() {

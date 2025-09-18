@@ -37,6 +37,7 @@ public class GmailService {
 
   private Gmail service;
   private String fromAddress;
+  private String gmailApiBaseUrl;
 
   /**
    * Initialize Gmail service with service account credentials.
@@ -48,6 +49,23 @@ public class GmailService {
    */
   public GmailService(String serviceAccountKeyJson, String impersonateUser)
     throws IOException, GeneralSecurityException {
+    this(serviceAccountKeyJson, impersonateUser, "https://www.googleapis.com");
+  }
+
+  /**
+   * Initialize Gmail service with service account credentials and configurable API base URL.
+   *
+   * @param serviceAccountKeyJson The service account key in JSON format
+   * @param impersonateUser The email address to impersonate (must be in the same domain)
+   * @param gmailApiBaseUrl The base URL for Gmail API (for testing with WireMock)
+   * @throws IOException If credential loading fails
+   * @throws GeneralSecurityException If HTTP transport initialization fails
+   */
+  public GmailService(
+    String serviceAccountKeyJson,
+    String impersonateUser,
+    String gmailApiBaseUrl
+  ) throws IOException, GeneralSecurityException {
     if (serviceAccountKeyJson == null || serviceAccountKeyJson.trim().isEmpty()) {
       throw new IllegalArgumentException(
         "Service account key JSON cannot be null or empty"
@@ -58,7 +76,12 @@ public class GmailService {
       throw new IllegalArgumentException("Impersonate user cannot be null or empty");
     }
 
+    if (gmailApiBaseUrl == null || gmailApiBaseUrl.trim().isEmpty()) {
+      throw new IllegalArgumentException("Gmail API base URL cannot be null or empty");
+    }
+
     this.fromAddress = impersonateUser; // Gmail API enforces From address = impersonated user
+    this.gmailApiBaseUrl = gmailApiBaseUrl;
 
     try {
       // Validate email address format
@@ -72,7 +95,11 @@ public class GmailService {
     }
 
     this.service = createGmailService(serviceAccountKeyJson, impersonateUser);
-    LOG.info("Gmail service initialized for user: {}", impersonateUser);
+    LOG.info(
+      "Gmail service initialized for user: {} with API base URL: {}",
+      impersonateUser,
+      gmailApiBaseUrl
+    );
   }
 
   /**
@@ -92,19 +119,23 @@ public class GmailService {
       credentials =
         ServiceAccountCredentials
           .fromStream(keyStream)
-          .createScoped(
-            Collections.singletonList("https://www.googleapis.com/auth/gmail.send")
-          )
+          .createScoped(Collections.singletonList(gmailApiBaseUrl + "/auth/gmail.send"))
           .createDelegated(impersonateUser);
     }
 
-    return new Gmail.Builder(
+    Gmail.Builder builder = new Gmail.Builder(
       HTTP_TRANSPORT,
       JSON_FACTORY,
       new HttpCredentialsAdapter(credentials)
     )
-      .setApplicationName(APPLICATION_NAME)
-      .build();
+      .setApplicationName(APPLICATION_NAME);
+
+    // Set custom root URL if not using the default Google APIs base URL
+    if (!gmailApiBaseUrl.equals("https://www.googleapis.com")) {
+      builder.setRootUrl(gmailApiBaseUrl + "/");
+    }
+
+    return builder.build();
   }
 
   /**

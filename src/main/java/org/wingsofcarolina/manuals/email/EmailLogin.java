@@ -62,10 +62,27 @@ public class EmailLogin {
    * @param impersonateUser The email address to impersonate
    */
   public static void initialize(String server, String impersonateUser) {
+    initialize(server, impersonateUser, "https://www.googleapis.com");
+  }
+
+  /**
+   * Initialize the email service with server information using Gmail API and configurable API base URL.
+   * The service account key is read directly from the GMAIL_SERVICE_ACCOUNT_KEY environment variable.
+   *
+   * @param server The server URL for email templates
+   * @param impersonateUser The email address to impersonate
+   * @param gmailApiBaseUrl The base URL for Gmail API (for testing with WireMock)
+   */
+  public static void initialize(
+    String server,
+    String impersonateUser,
+    String gmailApiBaseUrl
+  ) {
     LOG.info(
-      "Initializing email service with server: {}, Gmail API impersonation user: {}",
+      "Initializing email service with server: {}, Gmail API impersonation user: {}, Gmail API base URL: {}",
       server,
-      impersonateUser
+      impersonateUser,
+      gmailApiBaseUrl
     );
 
     if (server == null || server.trim().isEmpty()) {
@@ -77,6 +94,13 @@ public class EmailLogin {
       LOG.error("Impersonate user parameter is null or empty");
       throw new IllegalArgumentException(
         "Impersonate user parameter cannot be null or empty"
+      );
+    }
+
+    if (gmailApiBaseUrl == null || gmailApiBaseUrl.trim().isEmpty()) {
+      LOG.error("Gmail API base URL parameter is null or empty");
+      throw new IllegalArgumentException(
+        "Gmail API base URL parameter cannot be null or empty"
       );
     }
 
@@ -92,11 +116,17 @@ public class EmailLogin {
     EmailLogin.SERVER = server;
 
     try {
-      LOG.debug("Creating Gmail service with impersonate user: {}", impersonateUser);
-      gmailService = new GmailService(serviceAccountKeyJson, impersonateUser);
+      LOG.debug(
+        "Creating Gmail service with impersonate user: {} and API base URL: {}",
+        impersonateUser,
+        gmailApiBaseUrl
+      );
+      gmailService =
+        new GmailService(serviceAccountKeyJson, impersonateUser, gmailApiBaseUrl);
       LOG.info(
-        "Email service initialized successfully with Gmail API for user: {}",
-        impersonateUser
+        "Email service initialized successfully with Gmail API for user: {} using base URL: {}",
+        impersonateUser,
+        gmailApiBaseUrl
       );
     } catch (IllegalArgumentException e) {
       LOG.error("Invalid configuration for Gmail service: {}", e.getMessage(), e);

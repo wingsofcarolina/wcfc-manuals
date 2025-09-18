@@ -42,6 +42,12 @@ public class ManualsConfiguration extends Configuration {
   @JsonProperty
   Boolean sendStartupSlack;
 
+  @JsonProperty
+  String gmailApiBaseUrl;
+
+  @JsonProperty
+  String slackApiBaseUrl;
+
   public ManualsConfiguration() {
     ManualsConfiguration.instance = this;
   }
@@ -92,6 +98,14 @@ public class ManualsConfiguration extends Configuration {
 
   public Boolean getSendStartupSlack() {
     return sendStartupSlack;
+  }
+
+  public String getGmailApiBaseUrl() {
+    return gmailApiBaseUrl != null ? gmailApiBaseUrl : "https://www.googleapis.com";
+  }
+
+  public String getSlackApiBaseUrl() {
+    return slackApiBaseUrl != null ? slackApiBaseUrl : "https://hooks.slack.com";
   }
 
   public String getGs() {

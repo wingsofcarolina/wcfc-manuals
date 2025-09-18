@@ -34,6 +34,10 @@ sendStartupSlack: ${SEND_STARTUP_SLACK:-false}
 # Note: gmailServiceAccountKey is read directly from GMAIL_SERVICE_ACCOUNT_KEY environment variable
 gmailImpersonateUser: ${GMAIL_IMPERSONATE_USER:-no-reply@wingsofcarolina.org}
 
+# API base URLs (configurable for integration testing with WireMock)
+gmailApiBaseUrl: ${GMAIL_API_BASE_URL:-https://www.googleapis.com}
+slackApiBaseUrl: ${SLACK_API_BASE_URL:-https://hooks.slack.com}
+
 # Scheduled jobs are now handled via HTTP endpoints called by Cloud Scheduler
 
 # Configure ports used by DropWizard
