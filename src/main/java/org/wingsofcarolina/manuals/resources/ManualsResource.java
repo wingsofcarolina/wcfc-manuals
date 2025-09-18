@@ -999,10 +999,17 @@ public class ManualsResource {
     throws IOException {
     List<String> files = new ArrayList<>();
     files.addAll(listFiles("dynamic"));
-    if (!files.isEmpty()) {
+
+    // Filter for only wcfc-manuals-* files
+    List<String> manualFiles = files
+      .stream()
+      .filter(filename -> filename.startsWith("wcfc-manuals-"))
+      .collect(Collectors.toList());
+
+    if (!manualFiles.isEmpty()) {
       Map<String, String> result = new HashMap<String, String>();
       // Provide the name ...
-      String filename = files.get(0);
+      String filename = manualFiles.get(0);
       result.put("name", filename);
       java.nio.file.Path path = Paths.get("dynamic/" + filename);
 
@@ -1047,11 +1054,13 @@ public class ManualsResource {
     if (user != null) {
       LOG.info("Starting new archive generation.");
 
-      // Remove all the old files in the 'dynamic' directory (should only be one)
+      // Remove all the old wcfc-manuals-* files in the 'dynamic' directory (should only be one)
       Set<String> files = listFiles("dynamic");
       for (String name : files) {
-        File file = new File("dynamic/" + name);
-        file.delete();
+        if (name.startsWith("wcfc-manuals-")) {
+          File file = new File("dynamic/" + name);
+          file.delete();
+        }
       }
 
       ZipOutputStream zipOut = null;
@@ -1094,6 +1103,44 @@ public class ManualsResource {
       return Response.ok().build();
     } else {
       return Response.status(401).entity("Are you logged in??").build();
+    }
+  }
+
+  @GET
+  @Path("archive/download")
+  @Produces("application/zip")
+  public Response downloadArchive(@CookieParam("wcfc.manuals.token") Cookie cookie)
+    throws IOException {
+    User user = authUtils.getUserFromCookie(cookie);
+    if (user != null) {
+      List<String> files = new ArrayList<>();
+      files.addAll(listFiles("dynamic"));
+
+      // Filter for only wcfc-manuals-* files
+      List<String> manualFiles = files
+        .stream()
+        .filter(filename -> filename.startsWith("wcfc-manuals-"))
+        .collect(Collectors.toList());
+
+      if (!manualFiles.isEmpty()) {
+        String filename = manualFiles.get(0);
+        File file = new File("dynamic/" + filename);
+        if (file.exists()) {
+          InputStream inputStream = new FileInputStream(file);
+          return Response
+            .ok()
+            .type("application/zip")
+            .header("Content-Disposition", "attachment; filename=\"" + filename + "\"")
+            .entity(inputStream)
+            .build();
+        } else {
+          return Response.status(404).build();
+        }
+      } else {
+        return Response.status(404).build();
+      }
+    } else {
+      return Response.status(401).build();
     }
   }
 

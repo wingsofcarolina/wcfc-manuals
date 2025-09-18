@@ -331,7 +331,7 @@
 		<div>
 		<center>
 			{#if archive_details}
-				<a href="{archive_details["name"]}">
+				<a href="/api/archive/download">
 					Download Full Manual Archive // {archive_details["name"]}<br>
 					<div class="archive_details">Created : {archive_details["created"]}</div>
 					<div class="archive_details">Size : {archive_details["size"]}</div>
