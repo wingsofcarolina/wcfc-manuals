@@ -54,6 +54,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.jar.Attributes;
@@ -185,7 +186,7 @@ public class ManualsResource {
   public Response version() {
     Map<String, String> version = getBuildMetadata();
     if (version == null) {
-      return Response.status(404).build();
+      return Response.status(500).build();
     } else {
       return Response.ok().entity(version).build();
     }
@@ -1395,25 +1396,6 @@ public class ManualsResource {
     return false;
   }
 
-  @GET
-  @Path("mock")
-  @Produces(MediaType.APPLICATION_JSON)
-  @Consumes(MediaType.APPLICATION_JSON)
-  public Response mock() throws URISyntaxException {
-    User user = mockUser();
-
-    // User authenticated and identified. Save the info.
-    NewCookie cookie = authUtils.generateCookie(user);
-    return Response
-      .seeOther(new URI("/"))
-      .header("Set-Cookie", AuthUtils.sameSite(cookie))
-      .build();
-  }
-
-  private User mockUser() {
-    return new User("Dwight Frye", "dwight@openweave.org");
-  }
-
   private static URL url(String url) {
     try {
       return new URL(url);
@@ -1433,29 +1415,33 @@ public class ManualsResource {
       }
       version.put("build", "DEV");
       return version;
-    } else {
-      Enumeration<URL> resEnum;
-      try {
-        resEnum =
-          ManualsResource.class.getClassLoader().getResources(JarFile.MANIFEST_NAME);
-        while (resEnum.hasMoreElements()) {
-          URL url = resEnum.nextElement();
-          InputStream is = url.openStream();
-          if (is != null) {
-            Manifest manifest = new Manifest(is);
-            Attributes mainAttribs = manifest.getMainAttributes();
-            version.put("version", mainAttribs.getValue("Git-Build-Version"));
-            version.put("build", mainAttribs.getValue("Git-Commit-Id"));
-            if (version != null) {
-              return version;
-            }
+    }
+    try {
+      InputStream gitPropsStream =
+        ManualsResource.class.getClassLoader().getResourceAsStream("git.properties");
+      if (gitPropsStream != null) {
+        Properties gitProps = new Properties();
+        gitProps.load(gitPropsStream);
+        gitPropsStream.close();
+        for (String prop : new String[] {
+          "git.build.version",
+          "git.commit.id",
+          "git.branch",
+          "git.build.time",
+          "git.commit.user.name",
+          "git.build.version",
+          "git.commit.id.describe",
+        }) {
+          String propVal = gitProps.getProperty(prop);
+          if (propVal != null) {
+            version.put(prop, propVal);
           }
         }
-      } catch (IOException e1) {
-        // Silently ignore wrong manifests on classpath?
-        LOG.info("IOException during manifest retrieval : {}", e1);
       }
+    } catch (IOException e) {
+      LOG.info("IOException during git.properties retrieval: {}", e.getMessage());
       return null;
     }
+    return version;
   }
 }
