@@ -83,8 +83,10 @@ public class ManualsService extends Application<ManualsConfiguration> {
     // Set up Slack communications
     new Slack(config);
 
-    // Let those who care know we started
-    Slack.instance().sendString(Slack.Channel.NOTIFY, "Manuals server started.");
+    // Let those who care know we started (if configured to do so)
+    if (config.getSendStartupSlack() != null && config.getSendStartupSlack()) {
+      Slack.instance().sendString(Slack.Channel.NOTIFY, "Manuals server started.");
+    }
 
     // Get the startup date/time in GMT
     SimpleDateFormat dateFormatGmt = new SimpleDateFormat("yyyy-MMM-dd HH:mm:ss");

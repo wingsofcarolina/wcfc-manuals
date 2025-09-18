@@ -27,6 +27,9 @@ mockUser: ${MOCKUSER:-none}
 slackNotify: ${SLACK_TOKEN_NOTIFICATIONS:-none}     # Targets #notification
 slackManuals: ${SLACK_TOKEN_MANUALS:-none}    # Targets #manuals
 
+# Send startup Slack notification
+sendStartupSlack: ${SEND_STARTUP_SLACK:-false}
+
 # Gmail API configuration
 # Note: gmailServiceAccountKey is read directly from GMAIL_SERVICE_ACCOUNT_KEY environment variable
 gmailImpersonateUser: ${GMAIL_IMPERSONATE_USER:-no-reply@wingsofcarolina.org}

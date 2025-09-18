@@ -39,6 +39,9 @@ public class ManualsConfiguration extends Configuration {
   @JsonProperty
   String gmailImpersonateUser;
 
+  @JsonProperty
+  Boolean sendStartupSlack;
+
   public ManualsConfiguration() {
     ManualsConfiguration.instance = this;
   }
@@ -85,6 +88,10 @@ public class ManualsConfiguration extends Configuration {
 
   public String getGmailImpersonateUser() {
     return gmailImpersonateUser;
+  }
+
+  public Boolean getSendStartupSlack() {
+    return sendStartupSlack;
   }
 
   public String getGs() {
