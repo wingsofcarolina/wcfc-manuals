@@ -5,9 +5,15 @@ if [ -z "$1" ]; then
   exit 1
 fi
 
+if $(which podman); then
+  CONTAINER_CMD=podman
+elif $(which docker); then
+  CONTAINER_CMD=docker
+fi
+
 for SECRET in wcfc-apps-mongodb wcfc-apps-slack-notifications wcfc-apps-slack-manuals wcfc-apps-jwt-secret; do
-  if ! podman secret exists $SECRET; then
-    echo "Please set up Podman secrets before running this pod"
+  if ! ${CONTAINER_CMD} secret exists $SECRET; then
+    echo "Please set up secrets before running this"
     exit 1
   fi
 done
@@ -16,8 +22,8 @@ mkdir -p $(pwd)/log
 mkdir -p $(pwd)/root
 mkdir -p $(pwd)/dynamic
 
-podman rm -f wcfc-manuals
-podman run -d --name wcfc-manuals -p 9300:9300 \
+${CONTAINER_CMD} rm -f wcfc-manuals
+${CONTAINER_CMD} run -d --name wcfc-manuals -p 9300:9300 \
   --memory=2G \
   --secret=wcfc-apps-mongodb,type=env,target=MONGODB \
   --secret=wcfc-apps-WCFC_TOKEN,type=env,target=WCFC_TOKEN \

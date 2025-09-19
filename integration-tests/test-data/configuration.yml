@@ -1,0 +1,78 @@
+######
+# Test configuration for integration tests
+
+root: /app/test-data/root
+
+# Location of the MongoDB server (Docker container)
+mongodb: mongodb://localhost:27017
+
+# MongoDB database name
+mongodbDatabase: wcfc-manuals-test
+
+# URL of the server where the manuals service is running
+manualsServer: http://localhost:9300
+
+# Operational mode, DEV for testing
+mode: DEV
+
+# Authentication, ON for testing the auth flow
+auth: ON
+
+# Mock user - none for testing real auth flow
+mockUser: none
+
+# Slack channels - disabled for testing
+slackNotify: none
+slackManuals: none
+
+# Send startup Slack notification - disabled for testing
+sendStartupSlack: false
+
+# Gmail API configuration - using WireMock
+gmailImpersonateUser: no-reply@wingsofcarolina.org
+
+# API base URLs - pointing to WireMock for Gmail API
+gmailApiBaseUrl: http://localhost:8080
+slackApiBaseUrl: http://localhost:8080
+
+# Configure ports used by DropWizard
+server:
+    type: simple
+    connector:
+        type: http
+        port: 9300
+    applicationContextPath: /
+    adminContextPath: /admin
+    requestLog:
+        appenders:
+          - type: file
+            currentLogFilename: /tmp/manuals-http.log
+            threshold: ALL
+            archive: true
+            archivedLogFilenamePattern: /tmp/manuals-%i-%d-http.log
+            maxFileSize: 500MB
+            archivedFileCount: 5
+            timeZone: UTC
+
+# SLF4j Logging settings.
+logging:
+  # The default level of all loggers. Can be OFF, ERROR, WARN, INFO, DEBUG, TRACE, or ALL.
+  level: INFO
+
+  # Logger-specific levels.
+  loggers:
+    "org.wingsofcarolina.manuals": DEBUG
+    
+  appenders:
+      - type: console
+        threshold: ALL
+        timeZone: UTC
+        target: stdout
+      - type: file
+        currentLogFilename: /tmp/manuals.log
+        threshold: ALL
+        archive: true
+        archivedLogFilenamePattern: /tmp/manuals-%i-%d.log
+        maxFileSize: 500MB
+        archivedFileCount: 5
+        timeZone: UTC

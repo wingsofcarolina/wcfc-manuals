@@ -21,7 +21,9 @@ client/node_modules: client/package.json client/package-lock.json
 	@cd client && npm install --legacy-peer-deps
 	@touch client/node_modules
 
-docker/.build: $(APP_JAR)
+docker/$(APP_NAME).jar: $(APP_JAR)
+
+docker/.build: docker/$(APP_NAME).jar
 	@cd docker && $(CONTAINER_CMD) build . -t $(CONTAINER_TAG)
 	@touch docker/.build
 
@@ -31,7 +33,7 @@ build: docker/.build
 .PHONY: push
 push: docker/.build
 	@echo Pushing $(CONTAINER_TAG)...
-	@podman push $(CONTAINER_TAG)
+	@$(CONTAINER_CMD) push $(CONTAINER_TAG)
 
 .PHONY: launch
 launch: docker/.build
@@ -42,7 +44,14 @@ launch: docker/.build
 .PHONY: shutdown
 shutdown:
 	@echo Shutting down app...
-	@podman rm -f $(APP_NAME)
+	@$(CONTAINER_CMD) rm -f $(APP_NAME)
+
+integration-tests/wcfc-integration-testing/.built-flag: $(shell find integration-tests/wcfc-integration-testing -not -name '.*')
+	@cd integration-tests/wcfc-integration-testing && $(CONTAINER_CMD) build . -t wcfc-integration-testing && touch .built-flag
+
+.PHONY: integration-tests
+integration-tests: integration-tests/wcfc-integration-testing/.built-flag docker/$(APP_NAME).jar
+	@integration-tests/run-integration-tests.sh
 
 .PHONY: format
 format: client/node_modules

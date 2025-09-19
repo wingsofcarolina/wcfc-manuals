@@ -1,0 +1,10 @@
+{
+  "type": "service_account",
+  "project_id": "test",
+  "private_key_id": "test",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIBVQIBADANBgkqhkiG9w0BAQEFAASCAT8wggE7AgEAAkEAxVEVivGaEKbY++P4\nS4ZnEGvfxtHEDkMT1MGUhy8j1kxag/ulXmtwi8RndJ6BC/2IV7b1GXne4HVCfRHg\new+omwIDAQABAkAqUocFY2cBVVhLRw2V3YEzw3+fHJUp3fdd9huOl2zfZObG42gT\nkLC/gFPN5qE/YXZTGolsnfoGx+zAyv7rEsexAiEA4aMYOt1vpn0LFd2ES5jF9PhZ\nklpZIyJgRGgNfOHJVRMCIQDf3mPYOqLykyOKjUdHm1ereW2Vm9OYfUSWe0xB1U43\nWQIhAMwJTrzURsVXp7GTCbHOqZuXBHB6sMY7rK/PI/s8tXHvAiBWwCMIw5ApWANJ\nyX15riTG+gMRGpVgXgqaFaVzTWlF4QIhAL2tVa70k/Vk9/aw6N9bRihJivIUvYQ9\nq89LuI+PsnCA\n-----END PRIVATE KEY-----",
+  "client_email": "test@test.iam.gserviceaccount.com",
+  "client_id": "test",
+  "auth_uri": "http://localhost:8080/o/oauth2/auth",
+  "token_uri": "http://localhost:8080/token"
+}
