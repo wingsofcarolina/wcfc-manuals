@@ -5,9 +5,9 @@ if [ -z "$1" ]; then
   exit 1
 fi
 
-if $(which podman); then
+if [ -x "$(which podman)" ]; then
   CONTAINER_CMD=podman
-elif $(which docker); then
+elif [ -x "$(which docker)" ]; then
   CONTAINER_CMD=docker
 else
   echo "Neither podman nor docker are installed"
