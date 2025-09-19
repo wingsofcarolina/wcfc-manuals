@@ -14,7 +14,7 @@ target/
 backups/
 tokens/
 tmp/
-root/
+/root/
 /node_modules/
 .svelte-kit/
 pom.xml.tag
