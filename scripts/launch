@@ -9,6 +9,9 @@ if $(which podman); then
   CONTAINER_CMD=podman
 elif $(which docker); then
   CONTAINER_CMD=docker
+else
+  echo "Neither podman nor docker are installed"
+  exit 1
 fi
 
 for SECRET in wcfc-apps-mongodb wcfc-apps-slack-notifications wcfc-apps-slack-manuals wcfc-apps-jwt-secret; do
