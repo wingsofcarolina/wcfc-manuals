@@ -51,6 +51,7 @@ import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -1027,7 +1028,9 @@ public class ManualsResource {
 
       return Response.ok().entity(result).build();
     } else {
-      return Response.status(404).build();
+      Map<String, String> errorResult = new HashMap<>();
+      errorResult.put("message", "no archive file present");
+      return Response.status(404).entity(errorResult).build();
     }
   }
 
@@ -1065,6 +1068,12 @@ public class ManualsResource {
         tempFilename = "wcfc-manuals-" + dateFormatArchive.format(now) + ".tmp";
         fullpath = "dynamic/" + filename;
         tempFullpath = "dynamic/" + tempFilename;
+
+        // Ensure the dynamic directory exists
+        File dynamicDir = new File("dynamic");
+        if (!dynamicDir.exists()) {
+          dynamicDir.mkdirs();
+        }
 
         // Create the new archive with a temporary filename
         FileOutputStream fout = new FileOutputStream(new File(tempFullpath));
@@ -1173,10 +1182,10 @@ public class ManualsResource {
             .entity(inputStream)
             .build();
         } else {
-          return Response.status(404).build();
+          return Response.status(404).entity("no archive file present").build();
         }
       } else {
-        return Response.status(404).build();
+        return Response.status(404).entity("no archive file present").build();
       }
     } else {
       return Response.status(401).build();
@@ -1208,8 +1217,18 @@ public class ManualsResource {
   }
 
   public Set<String> listFiles(String dir) {
+    File directory = new File(dir);
+    if (!directory.exists() || !directory.isDirectory()) {
+      return new HashSet<>();
+    }
+
+    File[] files = directory.listFiles();
+    if (files == null) {
+      return new HashSet<>();
+    }
+
     return Stream
-      .of(new File(dir).listFiles())
+      .of(files)
       .filter(file -> !file.isDirectory())
       .map(File::getName)
       .collect(Collectors.toSet());
