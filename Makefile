@@ -65,6 +65,10 @@ check-format: client/node_modules
 	@mvn prettier:check -q || (echo Problem in Java formatting; exit 1)
 	@cd client && npx prettier --check . --log-level silent || (echo Problem in UI formatting; exit 1)
 
+.PHONY: version
+version:
+	@echo $(APP_VERSION)
+
 .PHONY: clean
 clean:
 	@rm -rfv target/ docker/ client/build/ client/dist/ client/.sveltekit/
