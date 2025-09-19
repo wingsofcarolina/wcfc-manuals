@@ -25,6 +25,6 @@ podman run -it --rm -p 9300:9300 \
     -v "$SCRIPT_DIR/test-scripts:/app/test-scripts" \
     -e GMAIL_SERVICE_ACCOUNT_KEY \
     -e WCFC_JWT_SECRET \
-    wcfc-integration-testing \
+    ghcr.io/wingsofcarolina/wcfc-integration-testing:latest\
     bash -c "$CMD"
 

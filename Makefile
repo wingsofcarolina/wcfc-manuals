@@ -46,11 +46,8 @@ shutdown:
 	@echo Shutting down app...
 	@$(CONTAINER_CMD) rm -f $(APP_NAME)
 
-integration-tests/wcfc-integration-testing/.built-flag: $(shell find integration-tests/wcfc-integration-testing -not -name '.*')
-	@cd integration-tests/wcfc-integration-testing && $(CONTAINER_CMD) build . -t wcfc-integration-testing && touch .built-flag
-
 .PHONY: integration-tests
-integration-tests: integration-tests/wcfc-integration-testing/.built-flag docker/$(APP_NAME).jar
+integration-tests: docker/$(APP_NAME).jar
 	@integration-tests/run-integration-tests.sh
 
 .PHONY: format
