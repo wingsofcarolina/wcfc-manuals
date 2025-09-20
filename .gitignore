@@ -28,6 +28,8 @@ dependency-reduced-pom.xml
 buildNumber.properties
 .mvn/timing.properties
 gha-creds-*
+integration-tests/test-data/root/access.0.*
+integration-tests/test-data/root/authentication.0.*
 
 # Ignore IntelliJ config except for run configurations
 /.idea/*
