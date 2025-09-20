@@ -42,7 +42,7 @@ push: check-version-not-dirty docker/.build
 
 .PHONY: deploy
 deploy: check-version-not-dirty push
-	@gcloud run deploy wcfc-groups --image $(CONTAINER_TAG) --region $(GOOGLE_CLOUD_REGION)
+	@gcloud run deploy $(APP_NAME) --image $(CONTAINER_TAG) --region $(GOOGLE_CLOUD_REGION)
 
 .PHONY: launch
 launch: docker/.build
