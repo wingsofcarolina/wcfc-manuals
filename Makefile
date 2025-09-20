@@ -1,8 +1,11 @@
+SHELL := /bin/bash
+
 APP_NAME := wcfc-manuals
 APP_VERSION := $(shell mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
 APP_JAR := target/$(APP_NAME)-$(APP_VERSION).jar
 JAVA_FILES := $(shell find src/main/java/org/wingsofcarolina -name '*.java')
-CONTAINER_TAG := us-central1-docker.pkg.dev/wcfc-apps/wcfc-apps/$(APP_NAME):$(APP_VERSION)
+GOOGLE_CLOUD_REGION := us-central1
+CONTAINER_TAG := $(GOOGLE_CLOUD_REGION)-docker.pkg.dev/wcfc-apps/wcfc-apps/$(APP_NAME):$(APP_VERSION)
 
 ifneq ($(shell which podman),)
 	CONTAINER_CMD := podman
@@ -28,10 +31,18 @@ docker/.build: $(APP_JAR)
 .PHONY: build
 build: docker/.build
 
+.PHONY: check-version-not-dirty
+check-version-not-dirty:
+	@if [[ "$(CONTAINER_TAG)" == *"dirty"* ]]; then echo Refusing to build/push dirty version; exit 1; fi
+
 .PHONY: push
-push: docker/.build
+push: check-version-not-dirty docker/.build
 	@echo Pushing $(CONTAINER_TAG)...
 	@$(CONTAINER_CMD) push $(CONTAINER_TAG)
+
+.PHONY: deploy
+deploy: check-version-not-dirty push
+	@gcloud run deploy wcfc-groups --image $(CONTAINER_TAG) --region $(GOOGLE_CLOUD_REGION)
 
 .PHONY: launch
 launch: docker/.build
