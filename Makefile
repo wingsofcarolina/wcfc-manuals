@@ -33,7 +33,7 @@ build: docker/.build
 
 .PHONY: check-version-not-dirty
 check-version-not-dirty:
-	@if [[ "$(CONTAINER_TAG)" == *"dirty"* ]]; then echo Refusing to build/push dirty version; exit 1; fi
+	@if [[ "$(CONTAINER_TAG)" == *"dirty"* ]]; then echo Refusing to build/push dirty version; git status; exit 1; fi
 
 .PHONY: push
 push: check-version-not-dirty docker/.build

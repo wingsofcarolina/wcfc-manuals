@@ -27,6 +27,7 @@ release.properties
 dependency-reduced-pom.xml
 buildNumber.properties
 .mvn/timing.properties
+gha-creds-*
 
 # Ignore IntelliJ config except for run configurations
 /.idea/*
