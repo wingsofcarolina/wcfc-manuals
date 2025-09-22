@@ -2,6 +2,9 @@ name: build-and-release
 
 on:
   workflow_dispatch:
+    inputs:
+      version:
+        required: false
   push:
     tags:
       - '[0-9]+.[0-9]+.[0-9]+'  # version numbers, like 1.2.3
@@ -22,6 +25,35 @@ jobs:
       uses: actions/checkout@v5
       with:
         fetch-depth: 0
+
+    - name: Install semver-cli
+      if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.version == '' }}
+      run: cargo install semver-cli
+
+    - name: Calculate the tag value
+      if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.version == '' }}
+      id: calc_tag
+      run: echo "tag=$(semver-cli $(make version) --increment)" >> $GITHUB_OUTPUT
+
+    - name: Determine the tag to be used
+      if: ${{ github.event_name == workflow_dispatch }}
+      id: tag
+      run: |
+        if [ -n "${{ github.events.inputs.version }}" ]; then
+          TAG="${{ github.events.inputs.version }}"
+        else
+          TAG="${{ steps.calc_tag.outputs.tag }}"
+        fi
+        echo "tag=$TAG" >> $GITHUB_OUTPUT
+
+    - name: Push git tag
+      if: ${{ github.event_name == workflow_dispatch }}
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+        git tag -a "${{ steps.tag.outputs.tag }}"
+        git push origin "${{ steps.tag.outputs.tag }}"
 
     - name: Setup Java
       uses: actions/setup-java@v5
