@@ -16,7 +16,7 @@ jobs:
     environment: Google Cloud
     permissions:
       actions: read
-      contents: read
+      contents: write
       packages: read
 
     steps:
