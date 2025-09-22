@@ -56,7 +56,7 @@ shutdown:
 	@$(CONTAINER_CMD) rm -f $(APP_NAME)
 
 .PHONY: integration-tests
-integration-tests: docker/$(APP_NAME).jar
+integration-tests: $(APP_JAR)
 	@integration-tests/run-integration-tests.sh
 
 .PHONY: format
@@ -77,6 +77,10 @@ check-format: client/node_modules
 .PHONY: version
 version:
 	@echo $(APP_VERSION)
+
+.PHONY: app-jar
+app-jar:
+	@echo $(APP_JAR)
 
 .PHONY: clean
 clean:

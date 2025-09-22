@@ -3,7 +3,7 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 
-JAR_FILE="$PROJECT_ROOT/docker/wcfc-manuals.jar"
+JAR_FILE="${PROJECT_ROOT}/$(cd $PROJECT_ROOT && make -s app-jar)"
 if [ ! -f "$JAR_FILE" ]; then
     echo -e "JAR file not found at $JAR_FILE"
     echo -e "Please build the application first (e.g., using the Makefile)"
