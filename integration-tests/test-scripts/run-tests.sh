@@ -54,7 +54,11 @@ APP_PID=$!
 
 # Wait for application to start
 echo -e "Waiting for application to start..."
-for i in {1..60}; do
+for i in {1..10}; do
+    if ! kill -0 "$APP_PID" 2>/dev/null; then
+      echo -e "Application has exited"
+      exit 1
+    fi
     if curl -s http://localhost:9300/admin/healthcheck >/dev/null 2>&1; then
         echo -e "Application is ready"
         break
@@ -63,7 +67,7 @@ for i in {1..60}; do
         echo -e "Application failed to start"
         exit 1
     fi
-    sleep 3
+    sleep 1
 done
 
 # Activate the Playwright venv
