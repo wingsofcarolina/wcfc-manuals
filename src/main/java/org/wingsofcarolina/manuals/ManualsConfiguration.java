@@ -40,9 +40,6 @@ public class ManualsConfiguration extends Configuration {
   String gmailImpersonateUser;
 
   @JsonProperty
-  Boolean sendStartupSlack;
-
-  @JsonProperty
   String gmailApiBaseUrl;
 
   @JsonProperty
@@ -94,10 +91,6 @@ public class ManualsConfiguration extends Configuration {
 
   public String getGmailImpersonateUser() {
     return gmailImpersonateUser;
-  }
-
-  public Boolean getSendStartupSlack() {
-    return sendStartupSlack;
   }
 
   public String getGmailApiBaseUrl() {

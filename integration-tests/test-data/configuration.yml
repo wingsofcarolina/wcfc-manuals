@@ -25,9 +25,6 @@ mockUser: none
 slackNotify: none
 slackManuals: none
 
-# Send startup Slack notification - disabled for testing
-sendStartupSlack: false
-
 # Gmail API configuration - using WireMock
 gmailImpersonateUser: no-reply@wingsofcarolina.org
 
