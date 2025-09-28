@@ -1,56 +1,5 @@
 <script>
-	import { onMount } from 'svelte';
-	import { goto } from '$app/navigation';
-	import { notifier } from '@beyonk/svelte-notifications'
-	import { user } from '../../store.js'
-	import { getUser } from '../../common.js'
-
-	let name = null;
-	let email = null;
-	let message;
-
-	onMount(function() {
-		getUser();
-		if ($user.anonymous === false) {
-			name = $user.name;
-			email = $user.email;
-		}
-	});
-
-	const sendMessage = async () => {
-		if (name == null) {
-			notifier.danger('Name missing, but required.');
-		} else if (email == null) {
-			notifier.danger('Email missing, but required.');
-    } else if (message == null || message === "") {
-      notifier.danger('Message missing, but required.');
-    } else {
-      var json = JSON.stringify({
-				name: name,
-				email: email,
-        message: message
-      });
-
-      const response = await fetch('/api/contact', {
-        method: "post",
-        withCredentials: true,
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-        body: json
-      });
-
-      if (!response.ok) {
-        notifier.warning('Sending of message failed, but try again because we really would like to hear from you.');
-      } else {
-        notifier.success('Message sent successfully.');
-				name = null;
-        email = null;
-        message = null;
-      }
-    }
-  }
+	// No JavaScript needed for static contact page
 </script>
 
 <svelte:head>
@@ -63,36 +12,32 @@
 <center>
 <div class="narrow">
 
-	<p>Use the form below to send a message to the administrators of the WCFC
-	server. We welcome messages, particulary if you see a problem that we might be
-	able to address. Reporting issues/problems aids us in creating a better
-	service for you and your fellow club members.</p>
+	<p>We welcome feedback, bug reports, and feature requests from our users.
+	To help us better track and manage issues, we've moved our support system
+	to GitHub Issues.</p>
 
-	<p>The message is sent to a channel in the WCFC Slack workspace where it will
-	be addressed by one of the administrators.</p>
+	<p>Please visit our <strong>GitHub Issues tracker</strong> to:</p>
+	<ul>
+		<li>Report bugs or technical problems</li>
+		<li>Request new features or improvements</li>
+		<li>Ask questions about the system</li>
+		<li>View existing issues and their status</li>
+	</ul>
+
+	<div class="github-link">
+		<a href="https://github.com/wingsofcarolina/wcfc-apps/issues" target="_blank" rel="noopener noreferrer">
+			<button class="github-button">
+				<img src="/github-icon.svg" alt="GitHub" class="github-icon" />
+				Open GitHub Issues
+			</button>
+		</a>
+	</div>
+
+	<p><em>This helps us organize feedback more effectively and allows the community
+	to see what issues are being worked on and contribute to discussions.</em></p>
 
 </div>
 </center>
-
-<div class="section">
-	<div class="contact_block">
-		<div class="contact_info">
-			<div class="contact_row">
-				<input type="text" id="name" name="name" placeholder="Name"
-				size=40 bind:value={name}>
-			</div>
-			<div class="contact_row">
-				<input type="text" id="email" name="email" placeholder="Email"
-				size=40 bind:value={email}>
-			</div>
-			<div class="contact_row">
-				<textarea type="text" id="message" name="message" placeholder="Message"
-				cols=41 rows=5 bind:value={message}></textarea>
-			</div>
-			<input id="submit" type="submit" value="Send Message" on:click={() => sendMessage()}>
-		</div>
-	</div>
-</div>
 
 <style>
 .title {
@@ -109,41 +54,49 @@
   border-radius: 3px;
 	margin: 0px auto 50px auto;
 }
-.section {
-  width: 100%;
-  margin-bottom: 3em;
-}
 .narrow p {
 	width: 70%;
 	text-align: left;
 	font-size: 1.2em;
 }
-.contact_block {
-  display: flex;
-  justify-content: space-around;
-  margin: 20px;
-  font-size: 20px;
+.narrow ul {
+	width: 70%;
+	text-align: left;
+	font-size: 1.2em;
+	margin: 1em 0;
 }
-.contact_info {
-  text-align: center;
+.narrow li {
+	margin: 0.5em 0;
 }
-
-input, textarea {
-	font-family: 'Courier', sans-serif;
-	padding: 10px;
-	margin: 10px 0;
-	border:0;
-	box-shadow:0 0 15px 4px rgba(0,0,0,0.26);
-	font-family: inherit;
+.github-link {
+	margin: 2em 0;
+	text-align: center;
 }
-input[type=submit] {
-		padding:5px 15px;
-		background:#ccc;
-		border:0 none;
-		cursor:pointer;
-		-webkit-border-radius: 5px;
-		border-radius: 5px;
-		height: 50px;
-		width: 100%;
+.github-button {
+	background-color: rgb(40, 90, 149);
+	color: white;
+	border: none;
+	padding: 15px 30px;
+	font-size: 1.2em;
+	border-radius: 8px;
+	cursor: pointer;
+	text-decoration: none;
+	display: inline-block;
+	transition: background-color 0.3s ease;
+	box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+.github-button:hover {
+	background-color: rgb(30, 70, 120);
+	box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+}
+.github-link a {
+	text-decoration: none;
+}
+.github-icon {
+	width: 20px;
+	height: 20px;
+	margin-right: 8px;
+	vertical-align: middle;
+	filter: brightness(0) invert(1);
 }
 </style>

@@ -767,47 +767,6 @@ public class ManualsResource {
     }
   }
 
-  @POST
-  @Path("contact")
-  @Produces(MediaType.APPLICATION_JSON)
-  public Response contact(
-    @CookieParam("wcfc.manuals.token") Cookie cookie,
-    Map<String, String> request
-  ) {
-    String name = request.getOrDefault("name", "NONE");
-    String email = request.getOrDefault("email", "NONE");
-    String message = request.getOrDefault("message", "NONE");
-
-    if (name != null && email != null && message != null) {
-      Slack
-        .instance()
-        .sendMessage(Slack.Channel.NOTIFY, contactMessage(name, email, message));
-    } else {
-      LOG.info("Someone without all the input values tried to send a contact message!");
-    }
-    return Response.ok().build();
-  }
-
-  private String contactMessage(String name, String email, String message) {
-    ZoneId zoneId = ZoneId.of("US/Eastern");
-    ZonedDateTime now = LocalDateTime.now().atZone(zoneId);
-
-    StringBuilder msg = new StringBuilder();
-    msg
-      .append("*Manuals contact sent at : ")
-      .append(dateFormatGmt.format(now))
-      .append("*\n");
-    msg
-      .append("**Contact from:** ")
-      .append(name)
-      .append(" (")
-      .append(email)
-      .append(")\n");
-    msg.append("**Message:** ").append(message);
-
-    return msg.toString();
-  }
-
   @GET
   @Path("freespace")
   @Produces(MediaType.APPLICATION_JSON)
