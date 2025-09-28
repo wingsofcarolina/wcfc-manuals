@@ -4,6 +4,7 @@ APP_NAME := wcfc-manuals
 APP_VERSION := $(shell mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
 APP_JAR := target/$(APP_NAME)-$(APP_VERSION).jar
 JAVA_FILES := $(shell find src/main/java/org/wingsofcarolina -name '*.java')
+CLIENT_FILES := $(shell find client/src -type f)
 GOOGLE_CLOUD_REGION := us-central1
 CONTAINER_TAG := $(GOOGLE_CLOUD_REGION)-docker.pkg.dev/wcfc-apps/wcfc-apps/$(APP_NAME):$(APP_VERSION)
 
@@ -17,7 +18,7 @@ else
 endif
 endif
 
-$(APP_JAR): pom.xml client/node_modules $(JAVA_FILES) $(shell find src/main/resources -type f)
+$(APP_JAR): pom.xml client/node_modules $(JAVA_FILES) $(CLIENT_FILES) $(shell find src/main/resources -type f)
 	@mvn --batch-mode
 
 client/node_modules: client/package.json client/package-lock.json
