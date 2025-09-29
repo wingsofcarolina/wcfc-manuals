@@ -1,7 +1,5 @@
 package org.wingsofcarolina.manuals.resources;
 
-import com.dropbox.core.DbxException;
-import com.dropbox.core.v2.files.ListFolderErrorException;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -125,8 +123,7 @@ public class ManualsResource {
   private ManualTypeComparator manual_compare = new ManualTypeComparator();
 
   @SuppressWarnings("static-access")
-  public ManualsResource(ManualsConfiguration config)
-    throws IOException, ListFolderErrorException, DbxException {
+  public ManualsResource(ManualsConfiguration config) throws IOException {
     this.config = config;
 
     // Create authentication and access logs
@@ -258,7 +255,7 @@ public class ManualsResource {
   public Response fetchFile(
     @CookieParam("wcfc.manuals.token") Cookie cookie,
     @PathParam("uuid") String uuid
-  ) throws IOException, DbxException {
+  ) throws IOException {
     User user = AuthUtils.instance().getUserFromCookie(cookie);
     if (user != null) {
       File file = new File(root + "/" + uuid + ".pdf");

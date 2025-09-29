@@ -1,7 +1,5 @@
 package org.wingsofcarolina.manuals.resources;
 
-import com.dropbox.core.DbxException;
-import com.dropbox.core.v2.files.ListFolderErrorException;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.CookieParam;
 import jakarta.ws.rs.GET;
@@ -58,8 +56,7 @@ public class MembersResource {
   private Integer authCount = 0;
 
   @SuppressWarnings("static-access")
-  public MembersResource(ManualsConfiguration config)
-    throws IOException, ListFolderErrorException, DbxException {
+  public MembersResource(ManualsConfiguration config) throws IOException {
     this.config = config;
 
     // See if we have a mock user
