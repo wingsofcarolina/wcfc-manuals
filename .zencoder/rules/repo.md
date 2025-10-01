@@ -53,6 +53,7 @@ make integration-tests
 ### Docker
 **Base Image**: azul/zulu-openjdk-alpine:21-latest
 **Configuration**: Uses Alpine Linux with Azul Zulu OpenJDK 21
+**Dockerfile**: src/main/resources/Dockerfile
 
 ### Testing
 **Unit Tests**: As of now there are no unit tests for this app.
