@@ -1,5 +1,3 @@
-######
-
 root: ${ROOT:-./root}
 
 # Location of the MongoDB server
@@ -29,6 +27,7 @@ slackManuals: ${SLACK_TOKEN_MANUALS:-none}    # Targets #manuals
 
 # Gmail API configuration
 # Note: gmailServiceAccountKey is read directly from GMAIL_SERVICE_ACCOUNT_KEY environment variable
+# Set GMAIL_DISABLED=true to disable Gmail functionality for local development
 gmailImpersonateUser: ${GMAIL_IMPERSONATE_USER:-no-reply@wingsofcarolina.org}
 
 # API base URLs (configurable for integration testing with WireMock)

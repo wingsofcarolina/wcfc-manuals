@@ -150,6 +150,48 @@ public class MembersResource {
       .build();
   }
 
+  @GET
+  @Path("debug-login/{email}")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response debugLogin(@PathParam("email") String email) {
+    // Only allow debug login when Gmail is disabled (development mode)
+    String gmailDisabled = System.getenv("GMAIL_DISABLED");
+    if (!"true".equalsIgnoreCase(gmailDisabled) && !"1".equals(gmailDisabled)) {
+      LOG.warn("Debug login attempted but GMAIL_DISABLED is not set to true");
+      return Response.status(404).build();
+    }
+
+    if (email == null || email.trim().isEmpty()) {
+      LOG.warn("Debug login attempted with empty email");
+      return Response.status(400).build();
+    }
+
+    // Look for the user in members first, then admins
+    Member member = Member.getByEmail(email.toLowerCase());
+    User user;
+    if (member != null) {
+      user = new User(member.getName(), member.getEmail());
+      LOG.info("Debug login for member: {} ({})", user.getName(), user.getEmail());
+    } else {
+      Admin admin = Admin.getByEmail(email.toLowerCase());
+      if (admin != null) {
+        user = new User(admin.getName(), admin.getEmail());
+        LOG.info("Debug login for admin: {} ({})", user.getName(), user.getEmail());
+      } else {
+        // If user doesn't exist in the system, create a mock user for development
+        user = new User("Development User", email.toLowerCase());
+        LOG.info("Debug login for mock user: {} ({})", user.getName(), user.getEmail());
+      }
+    }
+
+    authLog.logUser(user);
+    authCount++;
+
+    // Generate authentication cookie
+    NewCookie cookie = authUtils.generateCookie(user);
+    return Response.ok().header("Set-Cookie", AuthUtils.sameSite(cookie)).build();
+  }
+
   @POST
   @Path("populate")
   @Consumes(MediaType.MULTIPART_FORM_DATA)

@@ -1,10 +1,12 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="ManualsService" type="Application" factoryName="Application" nameIsGenerated="true">
     <envs>
+      <env name="GMAIL_DISABLED" value="true" />
       <env name="LOG_DIR" value="log" />
       <env name="MODE" value="DEV" />
-      <env name="MONGODB" value="127.0.0.1:27017" />
+      <env name="MONGODB" value="mongodb://127.0.0.1:27017" />
       <env name="SLACK" value="intentionally-invalid" />
+      <env name="WCFC_JWT_SECRET" value="9Bw3AUxdUZPeIlAkPeaNXbwG6nmrah2mK8atSBMZxUgF" />
     </envs>
     <option name="MAIN_CLASS_NAME" value="org.wingsofcarolina.manuals.ManualsService" />
     <module name="manuals" />

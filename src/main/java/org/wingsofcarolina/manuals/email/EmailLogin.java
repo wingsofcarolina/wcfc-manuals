@@ -18,6 +18,9 @@ public class EmailLogin {
   // Gmail service instance
   private static GmailService gmailService;
 
+  // Flag to indicate if Gmail is disabled (for local development)
+  private static boolean gmailDisabled = false;
+
   // The HTML body for the email.
   static final String HTMLBODY =
     "<html><div class=body>" +
@@ -78,6 +81,19 @@ public class EmailLogin {
     String impersonateUser,
     String gmailApiBaseUrl
   ) {
+    // Check if Gmail is disabled via environment variable
+    String gmailDisabledEnv = System.getenv("GMAIL_DISABLED");
+    gmailDisabled =
+      "true".equalsIgnoreCase(gmailDisabledEnv) || "1".equals(gmailDisabledEnv);
+
+    if (gmailDisabled) {
+      LOG.info(
+        "Gmail is DISABLED via GMAIL_DISABLED environment variable. Email login functionality will be mocked."
+      );
+      EmailLogin.SERVER = server;
+      return;
+    }
+
     LOG.info(
       "Initializing email service with server: {}, Gmail API impersonation user: {}, Gmail API base URL: {}",
       server,
@@ -114,7 +130,6 @@ public class EmailLogin {
     }
 
     EmailLogin.SERVER = server;
-
     try {
       LOG.debug(
         "Creating Gmail service with impersonate user: {} and API base URL: {}",
@@ -175,6 +190,37 @@ public class EmailLogin {
       throw new IllegalStateException(
         "Email service not properly initialized - SERVER is null"
       );
+    }
+
+    // If Gmail is disabled, simulate the email sending process
+    if (gmailDisabled) {
+      LOG.info(
+        "Gmail is disabled - simulating email send to {} for UUID {}. " +
+        "In a real scenario, a verification email would be sent.",
+        email,
+        uuid
+      );
+
+      // Generate verification code as normal (this stores it in the database)
+      Integer code;
+      try {
+        code = VerificationCode.makeEntry(uuid).getCode();
+        LOG.info(
+          "DEVELOPMENT MODE: Verification code for {} is: {} " +
+          "(This would normally be sent via email)",
+          email,
+          code
+        );
+      } catch (Exception e) {
+        LOG.error(
+          "Failed to generate verification code for UUID {}: {}",
+          uuid,
+          e.getMessage(),
+          e
+        );
+        throw new RuntimeException("Failed to generate verification code", e);
+      }
+      return;
     }
 
     if (gmailService == null) {
