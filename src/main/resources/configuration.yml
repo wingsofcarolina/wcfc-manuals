@@ -40,11 +40,11 @@ slackApiBaseUrl: ${SLACK_API_BASE_URL:-https://hooks.slack.com}
 server:
     type: simple
     connector:
-        type: h2c
+        type: http
         port: ${SERVER_PORT:-9300}
-        # HTTP/2 specific settings
-        maxConcurrentStreams: 1024
-        initialStreamRecvWindow: 65535
+        protocols:
+          - http/1.1
+          - h2c
     applicationContextPath: /
     adminContextPath: /admin
     requestLog:
