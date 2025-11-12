@@ -40,11 +40,8 @@ slackApiBaseUrl: ${SLACK_API_BASE_URL:-https://hooks.slack.com}
 server:
     type: simple
     connector:
-        type: http
+        type: h2c
         port: ${SERVER_PORT:-9300}
-        protocols:
-          - http/1.1
-          - h2c
     applicationContextPath: /
     adminContextPath: /admin
     requestLog:
