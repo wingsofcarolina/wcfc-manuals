@@ -12,7 +12,7 @@
 		</project.reporting.outputEncoding>
     <maven.compiler.source>21</maven.compiler.source>
     <maven.compiler.target>21</maven.compiler.target>
-    <dropwizard.version>5.0.0</dropwizard.version>
+    <dropwizard.version>5.0.1</dropwizard.version>
     <jackson.version>2.21.0</jackson.version>
     <!-- Default git properties (will be overridden by git-commit-id-plugin) -->
     <git.commit.id>unknown</git.commit.id>
