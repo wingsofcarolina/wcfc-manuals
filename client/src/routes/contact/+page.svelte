@@ -25,7 +25,7 @@
 	</ul>
 
 	<div class="github-link">
-		<a href="https://github.com/wingsofcarolina/wcfc-apps/issues" target="_blank" rel="noopener noreferrer">
+		<a href="https://github.com/wingsofcarolina/wcfc-manuals/issues" target="_blank" rel="noopener noreferrer">
 			<button class="github-button">
 				<img src="/github-icon.svg" alt="GitHub" class="github-icon" />
 				Open GitHub Issues
