@@ -23,9 +23,9 @@
     "@beyonk/svelte-notifications": "^4.3.0",
     "@sveltejs/adapter-node": "^5.5.3",
     "@sveltejs/adapter-static": "^3.0.10",
-    "@sveltejs/kit": "^2.53.1",
+    "@sveltejs/kit": "^2.53.2",
     "@sveltejs/vite-plugin-svelte": "^7.0.0",
-    "svelte": "^5.53.3",
+    "svelte": "^5.53.5",
     "svelte-check": "^4.4.3",
     "typescript": "^5.9.3",
     "vite": "^7.3.1"
