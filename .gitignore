@@ -35,3 +35,6 @@ integration-tests/test-data/root/authentication.0.*
 /.idea/*
 !/.idea/runConfigurations/
 !/.idea/runConfigurations/**
+
+# Ignore Codex lock file
+/.codex
