@@ -12,8 +12,8 @@
 		</project.reporting.outputEncoding>
     <maven.compiler.source>21</maven.compiler.source>
     <maven.compiler.target>21</maven.compiler.target>
-    <dropwizard.version>5.0.1</dropwizard.version>
-    <jackson.version>2.21.4</jackson.version>
+    <dropwizard.version>5.0.2</dropwizard.version>
+    <jackson.version>2.22.2</jackson.version>
     <!-- Default git properties (will be overridden by git-commit-id-plugin) -->
     <git.commit.id>unknown</git.commit.id>
     <git.tags>unknown</git.tags>
@@ -66,7 +66,7 @@
     <dependency>
       <groupId>org.apache.httpcomponents.client5</groupId>
       <artifactId>httpclient5</artifactId>
-      <version>5.6.1</version>
+      <version>5.6.4</version>
     </dependency>
     <!-- https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-api -->
     <dependency>
@@ -96,7 +96,7 @@
     <dependency>
       <groupId>org.mongodb</groupId>
       <artifactId>mongodb-driver-sync</artifactId>
-      <version>5.8.0</version>
+      <version>5.11.0</version>
     </dependency>
     <!-- https://mvnrepository.com/artifact/com.opencsv/opencsv -->
     <dependency>
@@ -114,14 +114,14 @@
     <dependency>
       <groupId>com.squareup.okhttp3</groupId>
       <artifactId>okhttp</artifactId>
-      <version>5.3.2</version>
+      <version>5.5.0</version>
     </dependency>
     <!--
 		https://mvnrepository.com/artifact/com.squareup.okhttp3/logging-interceptor -->
     <dependency>
       <groupId>com.squareup.okhttp3</groupId>
       <artifactId>logging-interceptor</artifactId>
-      <version>5.3.2</version>
+      <version>5.5.0</version>
     </dependency>
     <!--
 		https://mvnrepository.com/artifact/com.squareup.retrofit2/converter-gson -->
@@ -134,7 +134,7 @@
     <dependency>
       <groupId>org.apache.tika</groupId>
       <artifactId>tika-core</artifactId>
-      <version>3.3.1</version>
+      <version>4.0.0</version>
     </dependency>
     <!-- Gmail API for sending emails -->
     <dependency>
@@ -145,18 +145,18 @@
     <dependency>
       <groupId>com.google.auth</groupId>
       <artifactId>google-auth-library-oauth2-http</artifactId>
-      <version>1.47.0</version>
+      <version>1.51.0</version>
     </dependency>
     <dependency>
       <groupId>com.google.auth</groupId>
       <artifactId>google-auth-library-credentials</artifactId>
-      <version>1.47.0</version>
+      <version>1.51.0</version>
     </dependency>
     <!-- Apache Commons Codec for Base64 encoding -->
     <dependency>
       <groupId>commons-codec</groupId>
       <artifactId>commons-codec</artifactId>
-      <version>1.22.0</version>
+      <version>1.22.1</version>
     </dependency>
     <!-- JavaMail API for creating MIME messages -->
     <dependency>
@@ -168,7 +168,7 @@
     <dependency>
       <groupId>org.jsoup</groupId>
       <artifactId>jsoup</artifactId>
-      <version>1.22.2</version>
+      <version>1.23.2</version>
     </dependency>
     <!-- Jetty EE10 Servlets for CrossOriginFilter -->
     <dependency>
@@ -194,7 +194,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
-          <version>3.5.6</version>
+          <version>3.6.0</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -209,7 +209,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.15.0</version>
+          <version>3.16.0</version>
           <configuration>
             <source>21</source>
             <target>21</target>
@@ -223,7 +223,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-jar-plugin</artifactId>
-          <version>3.5.0</version>
+          <version>3.5.1</version>
           <configuration>
             <excludes>
               <exclude>**/root/*</exclude>
@@ -491,7 +491,7 @@
       <plugin>
         <groupId>io.fabric8</groupId>
         <artifactId>docker-maven-plugin</artifactId>
-        <version>0.48.1</version>
+        <version>0.49.0</version>
         <extensions>true</extensions>
         <configuration>
           <verbose>true</verbose>
